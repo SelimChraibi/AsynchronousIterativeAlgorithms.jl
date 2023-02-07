@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 
-🎷`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communication, allowing you to focus on designing your algorithm.
+🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communication, allowing you to focus on designing your algorithm.
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
 
@@ -33,9 +33,9 @@ using Distributed; addprocs(5)
 
 Say you want to implemtent a distributed version of *Stochastic Gradient Descent*. You'll need to define:
 - an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
-- the **initialisation step** where you compute the first iterate 
+- the **initialisation step** where you compute the first iteration 
 - the **worker step** perfromed by the workers when they receive a query `q::Q` from the central node
-- the **asynchronous central step** performed by the central node when receiving an answer `a::A` from a `worker`
+- the **asynchronous central step** performed by the central node when it receives an answer `a::A` from a `worker`
 ```julia
 @everywhere begin
     # algorithm
