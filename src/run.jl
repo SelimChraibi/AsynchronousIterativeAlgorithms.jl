@@ -162,16 +162,16 @@ function check_arguments(algorithm::AbstractAlgorithm{Q,A}, stopat::Union{Tuple{
         hasmethod(algorithm, (Vector{A}, Vector{Int64}, Any)) || throw(Core.ArgumentError("\"algorithm\" should be callable with the signature \"algorithm(as::Vector{$A}, workers::Vector{Int64}, problem::Any)"))
         return_types = Base.return_types(algorithm, (Vector{A}, Vector{Int64}, Any))
         
-        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(a::Vector{$A}, worker::Vector{Int64}, problem::Any)\" should output $Q but its output is or subtypes" * (length(return_types)≠1 ? "one of the following: " : " ") * "\"$(return_types...)\""))
+        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(a::Vector{$A}, worker::Vector{Int64}, problem::Any)\" should output $Q but its output is or subtypes \"$(return_types...)\""))
     else
         pids == [myid()] && throw(Core.ArgumentError("Non-distributed runs (\"pids == [myid()]\") are necessarily synchronous"))
         hasmethod(algorithm, (A, Int64, Any)) || throw(Core.ArgumentError("\"algorithm\" should be callable with the signature \"algorithm(a::$A, worker::Int64, problem::Any)\""))
         return_types = Base.return_types(algorithm, (A, Int64, Any))
-        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(a::$A, worker::Int64, problem::Any)\" should output $Q but its output is or subtypes" * (length(return_types)≠1 ? "one of the following: " : " ") * "\"$(return_types...)\""))
+        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(a::$A, worker::Int64, problem::Any)\" should output $Q but its output is or subtypes \"$(return_types...)\""))
     end
 
     hasmethod(algorithm, (Any,)) || throw(Core.ArgumentError("\"algorithm\" should be callable with the signature \"algorithm(problem::Any)\""))
     hasmethod(algorithm, (Q, Any)) || throw(Core.ArgumentError("\"algorithm\" should be callable with the signature \"algorithm(q::$Q, problem::Any)\""))
     return_types = Base.return_types(algorithm, (Q, Any))
-    all([supertype(typeof(algorithm)).parameters[2]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(q::$Q, problem::Any)\" should output $A but its output is or subtypes" * (length(return_types)≠1 ? "one of the following: " : " ") * "\"$(return_types...)\""))
+    all([supertype(typeof(algorithm)).parameters[2]] .<: return_types) || throw(Core.ArgumentError("\"algorithm(q::$Q, problem::Any)\" should output $A but its output is or subtypes \"$(return_types...)\""))
 end 
