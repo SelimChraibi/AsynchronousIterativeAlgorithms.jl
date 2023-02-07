@@ -18,7 +18,7 @@ julia> ] add AsynchronousIterativeAlgorithms
 
 ## Quick start
 
-![sequence diagram](./sequence.png "sequence diagram")
+![sequence diagram](https://user-images.githubusercontent.com/28357890/217114747-045d2598-b587-4e9c-b9f5-19b14211f7ef.png "sequence diagram")
 
 ```julia
 # Launch multiple processes (or remote machines)
