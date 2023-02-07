@@ -54,7 +54,7 @@ Solve the `distributed_problem` using the `algorithm`. Similar to the original `
 function Base.run(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), distance::Function=(x::Q,y::Q)->norm(x-y), synchronous=false, verbose=1) where {Q,A,M}
     run(algorithm, (pid)->distributed_problem[], stopat; saveat=saveat, save_answers=save_answers, pids=pids, synchronous=synchronous, distance=distance, verbose=verbose)
 end
-
+# Initialization step
 """
     run!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), verbose=1) where {Q,A}
 
