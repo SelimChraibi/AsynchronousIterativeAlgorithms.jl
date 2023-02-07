@@ -153,7 +153,7 @@ end
 function check_arguments(algorithm::AbstractAlgorithm{Q,A}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}, saveat::Tuple{Int64, Int64}, pids::Vector{Int64}, synchronous::Bool) where {Q,A} 
     stopat == (0,0,0.) && Stoppability(algorithm)==NotStoppable() && throw(Core.ArgumentError("You should have a stopping criterion"))
     myid() ∈ pids && pids ≠ [myid()] && throw(Core.ArgumentError("Current process \"$(myid())\" cannot be a worker"))
-    
+
     typeof(algorithm) <: AbstractAlgorithm || throw(Core.ArgumentError("\"algorithm\" should subtype \"AbstractAlgorithm{$Q,$A}\""))
 
     if synchronous
