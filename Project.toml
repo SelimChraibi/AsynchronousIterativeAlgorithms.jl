@@ -11,6 +11,8 @@ ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [compat]
 julia = "1"
+ProgressMeter = "1.7.2"
+DistributedObjects = "0.1.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
