@@ -148,32 +148,32 @@ function start_central(network::Network{Q,A}, algorithm::RecordedAlgorithm{Q,A},
         end
     end
 end
-
+ 
 
 function check_arguments(algorithm::AbstractAlgorithm{Q,A}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}, saveat::Tuple{Int64, Int64}, pids::Vector{Int64}, synchronous::Bool) where {Q,A} 
-    stopat == (0,0,0.) && Stoppability(algorithm)==NotStoppable() && throw(Core.ArgumentError("You should have a stopping criterion"))
-    myid() ∈ pids && pids ≠ [myid()] && throw(Core.ArgumentError("Current process $(myid()) cannot be a worker"))
+    # stopat == (0,0,0.) && Stoppability(algorithm)==NotStoppable() && throw(Core.ArgumentError("You should have a stopping criterion"))
+    # myid() ∈ pids && pids ≠ [myid()] && throw(Core.ArgumentError("Current process $(myid()) cannot be a worker"))
 
-    typeof(algorithm) <: AbstractAlgorithm || throw(Core.ArgumentError("algorithm should subtype AbstractAlgorithm{$Q,$A}"))
+    # typeof(algorithm) <: AbstractAlgorithm || throw(Core.ArgumentError("algorithm should subtype AbstractAlgorithm{$Q,$A}"))
 
-    if synchronous
-        prod(saveat) ≠ 0 && diff(saveat) ≠ 0 && @warn "saveat[1] ≠ saveat[2] ≠ 0 but epochs and iterations have the same meaning in the synchronous context"
-        prod(stopat[1:2]) ≠ 0 && diff(stopat[1:2]) ≠ 0 && @warn "stopat[1] ≠ stopat[2] ≠ 0 but epochs and iterations have the same meaning in the synchronous context"
-        hasmethod(algorithm, (Vector{A}, Vector{Int64}, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(as::Vector{$A}, workers::Vector{Int64}, problem::Any)"))
-        return_types = Base.return_types(algorithm, (Vector{A}, Vector{Int64}, Any))
+    # if synchronous
+    #     prod(saveat) ≠ 0 && diff(saveat) ≠ 0 && @warn "saveat[1] ≠ saveat[2] ≠ 0 but epochs and iterations have the same meaning in the synchronous context"
+    #     prod(stopat[1:2]) ≠ 0 && diff(stopat[1:2]) ≠ 0 && @warn "stopat[1] ≠ stopat[2] ≠ 0 but epochs and iterations have the same meaning in the synchronous context"
+    #     hasmethod(algorithm, (Vector{A}, Vector{Int64}, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(as::Vector{$A}, workers::Vector{Int64}, problem::Any)"))
+    #     return_types = Base.return_types(algorithm, (Vector{A}, Vector{Int64}, Any))
         
-        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("algorithm(a::Vector{$A}, worker::Vector{Int64}, problem::Any) should output $Q but its output is or subtypes $(return_types...)"))
-    else
-        pids == [myid()] && throw(Core.ArgumentError("Non-distributed runs (pids == [myid()]) are necessarily synchronous"))
-        hasmethod(algorithm, (A, Int64, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(a::$A, worker::Int64, problem::Any)"))
-        return_types = Base.return_types(algorithm, (A, Int64, Any))
-        all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("algorithm(a::$A, worker::Int64, problem::Any) should output $Q but its output is or subtypes $(return_types...)"))
-    end
+    #     all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("algorithm(a::Vector{$A}, worker::Vector{Int64}, problem::Any) should output $Q but its output is or subtypes $(return_types...)"))
+    # else
+    #     pids == [myid()] && throw(Core.ArgumentError("Non-distributed runs (pids == [myid()]) are necessarily synchronous"))
+    #     hasmethod(algorithm, (A, Int64, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(a::$A, worker::Int64, problem::Any)"))
+    #     return_types = Base.return_types(algorithm, (A, Int64, Any))
+    #     all([supertype(typeof(algorithm)).parameters[1]] .<: return_types) || throw(Core.ArgumentError("algorithm(a::$A, worker::Int64, problem::Any) should output $Q but its output is or subtypes $(return_types...)"))
+    # end
 
-    hasmethod(algorithm, (Any,)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(problem::Any)"))
-    hasmethod(algorithm, (Q, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(q::$Q, problem::Any)"))
-    return_types = Base.return_types(algorithm, (Q, Any))
-    all([supertype(typeof(algorithm)).parameters[2]] .<: return_types) || throw(Core.ArgumentError("algorithm(q::$Q, problem::Any) should output $A but its output is or subtypes $(return_types...)"))
+    # hasmethod(algorithm, (Any,)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(problem::Any)"))
+    # hasmethod(algorithm, (Q, Any)) || throw(Core.ArgumentError("algorithm should be callable with the signature algorithm(q::$Q, problem::Any)"))
+    # return_types = Base.return_types(algorithm, (Q, Any))
+    # all([supertype(typeof(algorithm)).parameters[2]] .<: return_types) || throw(Core.ArgumentError("algorithm(q::$Q, problem::Any) should output $A but its output is or subtypes $(return_types...)"))
 end 
 
 # function check_arguments(algorithm::AbstractAlgorithm{Q,A}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}, saveat::Tuple{Int64, Int64}, pids::Vector{Int64}, synchronous::Bool) where {Q,A} 
