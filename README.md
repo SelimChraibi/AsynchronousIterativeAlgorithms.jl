@@ -31,11 +31,13 @@ using Distributed; addprocs(5)
 @everywhere (using AsynchronousIterativeAlgorithms; const AIA = AsynchronousIterativeAlgorithms)
 ```
 
-Say you want to implemtent a distributed version of *Stochastic Gradient Descent*. You'll need to define:
+Say you want to implement a distributed version of *Stochastic Gradient Descent*. You'll need to define:
+
 - an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
 - the **initialisation step** where you compute the first iteration 
-- the **worker step** perfromed by the workers when they receive a query `q::Q` from the central node
+- the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the **asynchronous central step** performed by the central node when it receives an answer `a::A` from a `worker`
+  
 ```julia
 @everywhere begin
     # algorithm
@@ -47,12 +49,12 @@ Say you want to implemtent a distributed version of *Stochastic Gradient Descent
 
     # initialisation step 
     function (sgd::SGD)(problem::Any)
-        sgd.previous_q = rand(problem.m)
+        sgd.previous_q = rand(problem.n)
     end
 
     # worker step
     function (sgd::SGD)(q::Vector{Float64}, problem::Any) 
-        sgd.stepsize * problem.∇f(q, rand(1:problem.n))
+        sgd.stepsize * problem.∇f(q, rand(1:problem.m))
     end
 
     # asynchronous central step
@@ -62,7 +64,7 @@ Say you want to implemtent a distributed version of *Stochastic Gradient Descent
 end
 ```
 
-Now let's test our algorithm on a linear regression problem. This problem should be **compatible with your algorithm**. In this example it means providing attributes `n` and `m` (number of points and dimension of the regressor) and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
+Now let's test our algorithm on a linear regression problem. This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
 
 ```julia
 @everywhere begin
@@ -76,15 +78,16 @@ Now let's test our algorithm on a linear regression problem. This problem should
     end
 
     function LRMSE(A::Matrix{Float64}, b::Vector{Float64})
-        n, m = size(A)
+        m, n = size(A)
         L = maximum(A'*A)
+        ∇f(x) = A' * (A * x - b) / n
         ∇f(x,i) = A[i,:] * (A[i,:]' * x - b[i])
         LRMSE(A, b, n, m, L, ∇f)
     end
 end
 ```
 
-We're almost ready to run our algorithm...
+We're almost ready to start the algorithm...
 
 ```julia
 # Provide the stopping criteria 
@@ -96,8 +99,8 @@ sgd = SGD(0.01)
 # Create a function that returns an instance of your problem for a given pid 
 problem_constructor = (pid) -> LRMSE(rand(42,10),rand(42))
 
-# And you can run!
-history = run(sgd, problem_constructor, stopat);
+# And you can start!
+history = start(sgd, problem_constructor, stopat);
 ```
 
 ## Manual
@@ -107,7 +110,7 @@ history = run(sgd, problem_constructor, stopat);
 - [Active processes](#active-processes)
 - [Recording iterates](#recording-iterates)
 - [Custom stopping criterion](#custom-stopping-criterion)
-- [`run!`](#run)
+- [`start!`](#start)
 - [Algorithm templates](#algorithm-templates)
   
 
@@ -119,14 +122,14 @@ Suppose you have a `make_problem` function
 # Here we could also be reading the `A` and `b` from a file for example
 @everywhere function make_problem(pid)
     pid==1 && return nothing # for now let's give process 1 an empty problem
-    return LRMSE(rand(pid,10),rand(pid)) # here the sample size is n = pid, that's arbitrary, don't do this irl
+    return LRMSE(rand(pid,10),rand(pid)) # here the sample size is m = pid, that's arbitrary, don't do this irl
 end
 ```
 
 When instanciating your problems you might have three requirement:
 
 - **Limiting comunication costs** and **avoiding duplicated memory**: therefore, loading the distributed problems directly on their correct processes is be preferable to loading them first on the central node and then sending each of them to their process
-- **Persistant data**: You might want to reuse problems you've created for other experiments (you don't want your problem to be stuck in a remote loop of `run`'s local scope)
+- **Persistant data**: You might want to reuse problems you've created for other experiments (you don't want your problem to be stuck in a remote loop of `start`'s local scope)
 
 Depending on your needs, you have three options to construct your problems:
 
@@ -158,10 +161,10 @@ As previously noted, Option 2 should be avoided when working with large data. Ho
 ```julia
 function LRMSE(problems::Dict)
     pids = [pid for pid in keys(problems) if pid ≠ 1]
-    n = sum([problems[pid].n for pid in pids])
-    m = problems[pids[1]].m
+    n = problems[pids[1]].n
+    m = sum([problems[pid].m for pid in pids])
     L = sum([problems[pid].L for pid in pids])
-    ∇f(x) = sum([problems[pid].∇f(x) * problems[pid].n for pid in pids]) / n
+    ∇f(x) = sum([problems[pid].∇f(x) * problems[pid].m for pid in pids]) / m
     return LRMSE(nothing,nothing,n,m,L,∇f)
 end
 
@@ -175,10 +178,10 @@ sgd = SGD(1/problems[1].L)
 ```julia
 function LRMSE(d::DistributedObject)
     pids = [pid for pid in where(d) if pid ≠ 1]
-    n = sum(fetch.([@spawnat pid d[].n for pid in pids]))
-    m = fetch(@spawnat pids[1] d[].m)
+    n = fetch(@spawnat pids[1] d[].n)
+    m = sum(fetch.([@spawnat pid d[].m for pid in pids]))
     L = sum(fetch.([@spawnat pid d[].L for pid in pids]))
-    ∇f(x) = sum(fetch.([@spawnat pid d[].∇f(x) * d[].n for pid in pids])) / n
+    ∇f(x) = sum(fetch.([@spawnat pid d[].∇f(x) * d[].m for pid in pids])) / m
     return LRMSE(nothing,nothing,n,m,L,∇f)
 end
 
@@ -187,11 +190,11 @@ distributed_problem[] = LRMSE(distributed_problem);
 sgd = SGD(1/distributed_problem[].L)
 ```
 
-It's worth mentioning that instead of problem_constructor::Function, distributed_problem::DistributedObject can be passed to run. Both of the following are equivalent:
+It's worth mentioning that instead of `problem_constructor::Function`, `distributed_problem::DistributedObject` can be passed to `start`. Both of the following are equivalent:
 
 ```julia
-history = run(sgd, (pid)-> distributed_problem[], stopat)
-history = run(sgd, distributed_problem, stopat);
+history = start(sgd, (pid)-> distributed_problem[], stopat)
+history = start(sgd, distributed_problem, stopat);
 ```
 
 ### Synchronous run
@@ -205,10 +208,10 @@ If you want to run your algorithm synchronously you just have to define the **sy
 end
 ```
 
-...and to add the `synchronous=true` keyword to `run`
+...and to add the `synchronous=true` keyword to `start`
 
 ```julia
-history = run(sgd, distributed_problem, stopat; synchronous=true);
+history = start(sgd, distributed_problem, stopat; synchronous=true);
 ```
 
 ### Active processes
@@ -216,13 +219,13 @@ history = run(sgd, distributed_problem, stopat; synchronous=true);
 You can chose which processes are active with the `pids` keyword
 
 ```julia
-history = run(sgd, problem_constructor, stopat; pids=[2,3,6]);
+history = start(sgd, problem_constructor, stopat; pids=[2,3,6]);
 ```
 
-If `pids=[1]`, a non-distributed (and necessarily synchronous) version of your algorithm will be `run`.
+If `pids=[1]`, a non-distributed (and necessarily synchronous) version of your algorithm will be `start`ed.
 
 ```julia
-history = run(sgd, (pid)->LRMSE(rand(42,10),rand(42)), stopat; pids=[1], synchronous=true);
+history = start(sgd, (pid)->LRMSE(rand(42,10),rand(42)), stopat; pids=[1], synchronous=true);
 ```
 
 ### Recording iterates
@@ -230,12 +233,12 @@ history = run(sgd, (pid)->LRMSE(rand(42,10),rand(42)), stopat; pids=[1], synchro
 The queries`::Q` sent by the central node are saved at intervals specified by saveat=(iterations, epochs).
 
 ```julia
-history = run(sgd, distributed_problem, stopat; saveat=(10,0));
+history = start(sgd, distributed_problem, stopat; saveat=(10,0));
 ```
 To also save the workers' answers`::A`, simply add the `save_answers=true` keyword.
 
 ```julia
-history = run(sgd, distributed_problem, stopat; saveat=(10,0), save_answers=true);
+history = start(sgd, distributed_problem, stopat; saveat=(10,0), save_answers=true);
 ```
 
 ### Custom stopping criterion
@@ -260,11 +263,11 @@ As an example, let's modify the `SGD` example to include a *precision* criterion
     end
     
     function (sgd::CustomSGD)(problem::Any) 
-        sgd.previous_q = rand(problem.m)
+        sgd.previous_q = rand(problem.n)
     end
     
     function (sgd::CustomSGD)(q::Vector{Float64}, problem::Any)
-        sgd.stepsize * problem.∇f(q, rand(1:problem.n))
+        sgd.stepsize * problem.∇f(q, rand(1:problem.m))
     end
     
     function (sgd::CustomSGD)(a::Vector{Float64}, worker::Int64, problem::Any) 
@@ -278,18 +281,22 @@ As an example, let's modify the `SGD` example to include a *precision* criterion
     AIA.Stoppability(::CustomSGD) = Stoppable()    
 end
 
-history = run(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.));
+history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.));
 ```
 
-> This was only meant to be an example as in practice you can specify a precision threshold by passing a fourth value in `stopat`. To use a custom distance function instead of the default `(x,y)->norm(x-y)`, provide the desired function through the `distance` keyword of `run`.
+> This was only meant to be an example as in practice you can specify a precision threshold by passing a fourth value in `stopat`. To use a custom distance function instead of the default `(x,y)->norm(x-y)`, provide the desired function through the `distance` keyword of `start`.
 
 ```julia
-history = run(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distance=(x,y)->norm(x-y,1));
+history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distance=(x,y)->norm(x-y,1));
 ```
 
-### `run!`
+### `start!`
 
-`run` uses a deep copy of your algorithm and won't modify it. To enable modifications (e.g. to record information during optimization), use `run!`.
+`start` uses a deep copy of your algorithm and won't modify it. To enable modifications (e.g. to record information during the execution), use `start!`.
+
+### Resilience
+
+If you expect some workers to fail but still want the algorithm to continue running, you can set the `resilience` parameter to the maximum number of worker failures you can tolerate before the execution is terminated.
 
 ### Algorithm templates
 
@@ -316,7 +323,7 @@ The `AggregationAlgorithm` in this library requires you to specify three methods
     end
 end 
 
-history = run(agg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
+history = start(agg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
 ```
 
 **Memory limitation:** At any point in time, the central worker should have access must have access to the latest answers $a_i$ from *all* the connected workers. This means storing a lot of $a_i$ if we use many workers. There is a workaround when the aggregation operation is an *average*. In this case only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.
@@ -334,7 +341,7 @@ history = run(agg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
     end
 end
 
-history = run(avg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
+history = start(avg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
 ```
 
 Hope you find this library helpful and look forward to seeing how you put it to use!

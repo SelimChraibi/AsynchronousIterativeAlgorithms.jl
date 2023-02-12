@@ -15,7 +15,7 @@ Types subtyping `AbstractAlgorithm` should be callable with the following signat
 - when `run` takes the keyword `synchronous=true`, `(algorithm::AbstractAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int64}, problem::Any) where {Q,A}` is the step performed by the central node when receiving the answers `as::Vector{A}` from all the workers in `pids`
 
 They can additionally define:
--`AsynchronousOptimize.stopnow(algorithm::MyAlgorithm)` (with the trait `AsynchronousOptimize.Stoppability(::MyAlgorithm) = Stoppable()`) to add a stopping condition to `run`'s (iterations, epochs, time) stopping condition
+-`AsynchronousIterativeAlgorithms.stopnow(algorithm::MyAlgorithm)` (with the trait `AsynchronousIterativeAlgorithms.Stoppability(::MyAlgorithm) = Stoppable()`) to add a stopping condition to `run`'s (iterations, epochs, time) stopping condition
 """
 abstract type AbstractAlgorithm{Q,A} end
 
@@ -56,7 +56,7 @@ mutable struct RecordedAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
         epoch = 0
         time = 0.
         start_time = 0.
-        progress_meter = Progress(100; desc="Optimizing:", showspeed=true, enabled=verbose>0)
+        progress_meter = Progress(100; desc="Iterating:", showspeed=true, enabled=verbose>0)
 
         new{Q,A}(algorithm, iteration, epoch, time, iterations, epochs, timestamps, queries, answers, save_answers, answer_count, answer_origin, start_time, progress_meter, stopat, saveat, distance, verbose)
     end
@@ -163,23 +163,23 @@ end
 """
 Function used in `record` as an argument of `ProgressMeter.next!`
 """
-function generate_showvalues(ra::RecordedAlgorithm{Q,A}) where {Q,A}
+function generate_showvalues(ra::RecordedAlgorithm)
     () -> [(:iterations, ra.iteration), (:epochs, ra.epoch), (:answers, string(ra.answer_count)[6:end-1])]  
 end
 
 """
 Compile the results to be outputed 
 """
-function report(ra::RecordedAlgorithm{Q,A}) where {Q,A}
+function report(ra::RecordedAlgorithm)
     (queries=ra.queries, answers=ra.answers, iterations=ra.iterations, epochs=ra.epochs, timestamps=ra.timestamps, answer_origin=ra.answer_origin, answer_count=ra.answer_count)
 end
 
 """
 Return true if the stopping condition has been reached
 """
-stopnow(ra::RecordedAlgorithm{Q,A}) where {Q,A} = stopnow(Stoppability(ra.algorithm), ra)
-stopnow(::Stoppable, ra::RecordedAlgorithm{Q,A}) where {Q,A} = stopnow(ra.algorithm) || stopnow(NotStoppable(), ra)
-function stopnow(::NotStoppable, ra::RecordedAlgorithm{Q,A}) where {Q,A}
+stopnow(ra::RecordedAlgorithm) = stopnow(Stoppability(ra.algorithm), ra)
+stopnow(::Stoppable, ra::RecordedAlgorithm)= stopnow(ra.algorithm) || stopnow(NotStoppable(), ra)
+function stopnow(::NotStoppable, ra::RecordedAlgorithm)
     (ra.stopat[1] ≠ 0 && ra.iteration ≥ ra.stopat[1]) || 
     (ra.stopat[2] ≠ 0 && ra.epoch ≥ ra.stopat[2]) || 
     (ra.stopat[3] ≠ 0 && ra.time ≥ ra.stopat[3]) || 

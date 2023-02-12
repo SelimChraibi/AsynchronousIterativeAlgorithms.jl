@@ -12,9 +12,9 @@ The function parameters should have the following signature
 - `query(a::A, problem::Any)`
 - `answer(q::Q, problem::Any)`
 
-(Not memory optimized: `length(pids)` answers are stored on the central worker at all time)
+(Not memory optimized: `length(pids)` answers are stored on the central worker at all times)
 """
-struct AggregationAlgorithm{Q,A}<:AbstractAlgorithm{Q,A}
+struct AggregationAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     pids::Vector{Int64}
     initialize::Function
     aggregate::Function
@@ -61,7 +61,7 @@ end
 """
     (::AggregationAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}
 
-Steps perfromed by the wokers when they receive a query `x::Q` from the central node
+Steps performed by the workers when they receive a query `x::Q` from the central node
 """
 function (agg::AggregationAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}
     agg.answer(q, problem)
@@ -80,18 +80,18 @@ The function parameters should have the following signature
 - `query(a::A, problem::Any)`
 - `answer(q::Q, problem::Any)`
 
-(Memory optimized: only the equivalent of one answer is stored on the central worker at all time)
+(Memory optimized: only the equivalent of one answer is stored on the central worker at all times)
 """
-mutable struct AveragingAlgorithm{Q,A}<:AbstractAlgorithm{Q,A}
+mutable struct AveragingAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     pids::Vector{Int64}
     initialize::Function
     query::Function
     answer::Function
     connected::BitVector
     last_normalization::Float64
-    last_answer::Union{A, Nothing}
+    last_answer::Union{A,Nothing}
     last_answers::Vector{A}
-    last_average::Union{A, Nothing}
+    last_average::Union{A,Nothing}
     weights::Vector{Float64}
     function AveragingAlgorithm{Q,A}(initialize::Function, query::Function, answer::Function; pids=procs(), weights=ones(nprocs())) where {Q,A}
         @assert length(pids) == length(weights) "There should be as many weights as there are pids"
@@ -101,11 +101,11 @@ mutable struct AveragingAlgorithm{Q,A}<:AbstractAlgorithm{Q,A}
         for (pid, weight) in zip(pids, weights)
             sparse_weights[pid] = weight
         end
-        last_normalization = 1.
+        last_normalization = 1.0
         last_answer = nothing
         last_answers = Vector{A}(undef, maximum(pids))
         last_average = nothing
-        
+
         new(pids, initialize, query, answer, connected, last_normalization, last_answer, last_answers, last_average, sparse_weights)
     end
 end
@@ -138,18 +138,19 @@ end
 Synchronous step performed by the central node when receiving answers `a::Vector{A}` respectively from `workers::Vector{Int64}`
 """
 function (avg::AveragingAlgorithm{Q,A})(δas::Vector{A}, workers::Vector{Int64}, problem::Any) where {Q,A}
-    avg.last_average = isnothing(avg.last_average) ? δas : sum(avg.weights[workers] * δas)/sum(avg.weights) + avg.last_average
+    avg.last_average = isnothing(avg.last_average) ? δas : sum(avg.weights[workers] * δas) / sum(avg.weights) + avg.last_average
     avg.query(avg.last_average, problem)
 end
 
 """
-    (::AveragingAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}
+ (::AveragingAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}
 
-Steps perfromed by the wokers when they receive a query `q::Q` from the central node
+Steps performed by the workers when they receive a query `q::Q` from the central node
 """
 function (avg::AveragingAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}
     a = avg.answer(q, problem)
     δa = isnothing(avg.last_answer) ? a : a - avg.last_answer
     avg.last_answer = a
-    return δa 
+    return δa
 end
+
