@@ -10,7 +10,7 @@ addprocs(5)
     #              network
     ######################################
 
-    @everywhere using AsynchronousIterativeAlgorithms: Network, send_query, get_answer, send_answer, get_query, bind, close
+    @everywhere using AsynchronousIterativeAlgorithms: Network, send_query, get_answer, send_answer, get_query, open_network, bound_to, close, WorkerFailedException
 
     # Network sending and reveiving
     n = Network{Int64, Int64}()
@@ -21,35 +21,79 @@ addprocs(5)
     @test get_answer(n) == (42 => 2)
     send_query(n, 123)
     @test remotecall_fetch(get_query, 2, n) == 123
-    
-    # binding a task to a network
 
-    n = Network{Int64, Bool}()
-    task = @task begin sleep(10) end
-    bound_task = bind(n, task)
-    schedule(bound_task)
     close(n)
-    @test istaskdone(task)
-    @test !n.isopen
-
-    # binding a task to a network (terminating a finished task)
-
-    n = Network{Int64, Bool}()
-    task = @task begin sleep(0.01) end
-    bound_task = bind(n, task)
-    schedule(bound_task)
-    wait(bound_task)
-    close(n)
-    @test istaskdone(task)
+    @test !isopen(n)
     
-    # binding a task to a network (distributed version) 
-
-    n = Network{Int64, Bool}()
-    @everywhere 2 begin 
-        task = @task begin sleep(10) end
-        bound_task = bind($n, task)
-        schedule(errormonitor(bound_task))
+    # Executions bound to the network
+    @everywhere function test_send_receive(network)
+        bound_to(network) do network
+            q = get_query(network)
+            send_answer(network, q*"answer")
+        end
     end
-    close(n)
-    @test @everywhere 2 istaskdone(task)
+    
+    open_network(String, String) do network
+        @async remotecall_fetch(test_send_receive, 2, network)
+        send_query(network, "query", 2)
+        a, worker = get_answer(network)
+        @test a == "queryanswer" && worker == 2
+    end
+
+    # Error at worker
+    @everywhere function test_error_at_worker(network)
+        bound_to(network) do network
+            error()
+        end
+    end
+    
+    @test try
+        open_network() do network
+            remotecall_fetch(test_error_at_worker, 2, network)
+        end
+        false
+    catch e
+        true
+    end
+
+    # Error at worker with resilience
+    @everywhere function test_error_at_worker(network)
+        bound_to(network) do network
+            error("This error should be printed")
+        end
+    end
+    
+    @test try
+        open_network(; resilience=1) do network
+            remotecall_fetch(test_error_at_worker, 2, network)
+        end
+        true
+    catch e
+        false
+    end
+
+
+    # Bound worker execution dies when central ends
+    rc = RemoteChannel(()->Channel(1))
+
+    @everywhere function test_end_at_central(network, rc)
+        bound_to(network) do network
+            sleep(0.1)
+            put!(rc, 42)
+        end
+    end
+
+    open_network() do network
+        @async remotecall_fetch(test_end_at_central, 2, network, rc)
+    end
+
+    @test !isready(rc)
+
+    # sanity check: we wait for test_error_at_central
+    open_network() do network
+        remotecall_fetch(test_end_at_central, 2, network, rc)
+    end
+
+    @test isready(rc)
+
 end
