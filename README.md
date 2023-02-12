@@ -25,9 +25,7 @@ Say you want to implement a distributed version of *Stochastic Gradient Descent*
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
 
-
-![sequence Diagram](https://user-images.githubusercontent.com/28357890/217202965-8fc149e2-9b0f-4d7d-a403-ad9f332f9da1.png "Sequence Diagram")
-
+![Sequence Diagram](https://user-images.githubusercontent.com/28357890/218343892-956b638e-ede7-49d0-8209-853eb4bee63e.png "Sequence Diagram")
 
 Let's first of all set up our distributed environement.
 
@@ -136,24 +134,16 @@ end
 
 When instanciating your problems you might have three requirement:
 
-- **Limiting comunication costs** and **avoiding duplicated memory**: therefore, loading the distributed problems directly on their correct processes is be preferable to loading them first on the central node and then sending each of them to their process
-- **Persistant data**: You might want to reuse problems you've created for other experiments (you don't want your problem to be stuck in a remote loop of `start`'s local scope)
+- **Limiting comunication costs** and **avoiding duplicated memory**: loading problems directly on their assigned processes is be preferable to loading them central node before sending them to their respective processes
+- **Persistant data**: necessary if you want to reuse problems for multiple experiments (you don't want your problems to be stuck on  remote processes in `start`'s local scope)
 
 Depending on your needs, you have three options to construct your problems:
 
-|  | communication costs <br> & duplicated memory | single use problems |
-|---|:---:|:---:|
-| Option 1 |  | ❌ |
-| Option 2 | ❌ |  |
-| Option 3 |  |  |
-
-Here are your 3 options:
-
 ```julia
-# Option 1: Instantiate the problems remotely at each process
+# Option 1: Instantiate the problems remotely
 problem_constructor = make_problem 
 
-# Option 2: Instantiate the problems on the central node and send them all to the remote processes
+# Option 2: Instantiate the problems on the central node and send them to their respective processes
 problems = Dict(procs() .=> make_problem.(procs()));
 problem_constructor = (pid) -> problems[pid]
 
@@ -161,8 +151,15 @@ problem_constructor = (pid) -> problems[pid]
 @everywhere using DistributedObjects
 distributed_problem = DistributedObject((pid) -> make_problem(pid), pids=procs())
 ```
-
 > Option 3 uses [`DistributedObjects`](https://github.com/Selim78/DistributedObjects.jl). In a nutshell, a `DistributedObject` instance references at most one object per process, and you can access the object stored on the current process with `[]`
+
+
+|  	| communication costs <br>& duplicated memory 	| single use objectives 	|  	|
+|---	|:---:	|:---:	|---	|
+| Option 1 	|  	| ❌ 	| <img width="300" src="https://user-images.githubusercontent.com/28357890/218340543-6f15446f-30ef-44e4-9c80-db595e47e26a.png"> 	|
+| Option 2 	| ❌ 	|  	| <img width="300" src="https://user-images.githubusercontent.com/28357890/218340512-418b1bc7-4efc-404a-9cb9-e3c474255c8b.png"> 	|
+| Option 3 	|  	|  	| <img width="300" src="https://user-images.githubusercontent.com/28357890/218340522-64e1b00b-2c9b-419a-8aee-9bcb163a99e9.png"><br> 	|
+
 
 As previously noted, Option 2 should be avoided when working with large data. However, it does offer the advantage of preserving access to problems, which is not possible with Option 1. This opens up the possibility of reconstructing the global problem.
 
