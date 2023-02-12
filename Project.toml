@@ -1,7 +1,7 @@
 name = "AsynchronousIterativeAlgorithms"
 uuid = "329f2bf2-1773-4f40-9abf-1830ae341a86"
 authors = ["selim-chraibi"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
