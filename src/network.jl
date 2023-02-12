@@ -61,8 +61,8 @@ function central_interruptor(n::Network, task::Task)
     end
 end
 
-# Execute `f(network)` and interrupt it when `resilience` processes fail
-function open_network(f::Function, Q::Type, A::Type, pids=workers(), resilience=0)
+# Create a network, execute `f(network)` and interrupt it when `resilience` processes fail
+function open_network(f::Function, Q=Any, A=Any; pids=workers(), resilience=0)
     network = Network{Q,A}(pids, resilience)
     task = @task f(network)
 

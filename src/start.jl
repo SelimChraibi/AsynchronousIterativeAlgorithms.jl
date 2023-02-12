@@ -80,8 +80,7 @@ function recorded_start(recorded_algorithm::RecordedAlgorithm{Q,A}, problem_cons
     if pids == [myid()] # non-distributed case
         start_central(recorded_algorithm, problem_constructor)
     else
-        # Network{Q,A}(pids) do network
-        open_network(Q, A, pids, resilience) do network
+        open_network(Q, A; pids=pids, resilience=resilience) do network
             for pid in pids
                 @async remotecall_fetch(start_worker, pid, network, recorded_algorithm, problem_constructor)
             end
@@ -106,7 +105,7 @@ end
 function start_worker(network::Network{Q,A}, recorded_algorithm::RecordedAlgorithm{Q,A}, problem_constructor::Function) where {Q,A}
     problem = problem_constructor(myid())
     bound_to(network) do network
-        while isopen(network)
+        while true
             q = get_query(network)
             a = recorded_algorithm(q, problem)
             send_answer(network, a)
