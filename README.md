@@ -18,7 +18,15 @@ julia> ] add AsynchronousIterativeAlgorithms
 
 ## Quick start
 
+Say you want to implement a distributed version of *Stochastic Gradient Descent*. You'll need to define:
+
+- an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
+- the **initialisation step** where you compute the first iteration 
+- the **worker step** performed by the workers when they receive a query `q::Q` from the central node
+- the **asynchronous central step** performed by the central node when it receives an answer `a::A` from a `worker`
+
 ![sequence Diagram](https://user-images.githubusercontent.com/28357890/217202965-8fc149e2-9b0f-4d7d-a403-ad9f332f9da1.png "Sequence Diagram")
+
 
 ```julia
 # Launch multiple processes (or remote machines)
@@ -30,13 +38,6 @@ using Distributed; addprocs(5)
 # You can now use AsynchronousIterativeAlgorithms
 @everywhere (using AsynchronousIterativeAlgorithms; const AIA = AsynchronousIterativeAlgorithms)
 ```
-
-Say you want to implement a distributed version of *Stochastic Gradient Descent*. You'll need to define:
-
-- an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
-- the **initialisation step** where you compute the first iteration 
-- the **worker step** performed by the workers when they receive a query `q::Q` from the central node
-- the **asynchronous central step** performed by the central node when it receives an answer `a::A` from a `worker`
   
 ```julia
 @everywhere begin
