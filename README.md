@@ -23,10 +23,13 @@ Say you want to implement a distributed version of *Stochastic Gradient Descent*
 - an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
 - the **initialisation step** where you compute the first iteration 
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
-- the **asynchronous central step** performed by the central node when it receives an answer `a::A` from a `worker`
+- the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
+
 
 ![sequence Diagram](https://user-images.githubusercontent.com/28357890/217202965-8fc149e2-9b0f-4d7d-a403-ad9f332f9da1.png "Sequence Diagram")
 
+
+Let's first of all set up our distributed environement.
 
 ```julia
 # Launch multiple processes (or remote machines)
@@ -38,6 +41,8 @@ using Distributed; addprocs(5)
 # You can now use AsynchronousIterativeAlgorithms
 @everywhere (using AsynchronousIterativeAlgorithms; const AIA = AsynchronousIterativeAlgorithms)
 ```
+
+Now to the implementation.
   
 ```julia
 @everywhere begin
@@ -74,7 +79,7 @@ Now let's test our algorithm on a linear regression problem. This problem must b
         b::Union{Vector{Float64}, Nothing}
         n::Int64
         m::Int64
-        L::Float64
+        L::Float64 # Lipschitz constant of f
         ∇f::Function
     end
 
@@ -111,7 +116,8 @@ history = start(sgd, problem_constructor, stopat);
 - [Active processes](#active-processes)
 - [Recording iterates](#recording-iterates)
 - [Custom stopping criterion](#custom-stopping-criterion)
-- [`start!`](#start)
+- [`start` vs `start!`](#start-vs-start)
+- [Handling worker failures](#handling-worker-failures)
 - [Algorithm templates](#algorithm-templates)
   
 
@@ -120,10 +126,11 @@ history = start(sgd, problem_constructor, stopat);
 Suppose you have a `make_problem` function
 
 ```julia
-# Here we could also be reading the `A` and `b` from a file for example
+# Note: In this example we sample `A` and `b`. 
+# In practice, we could read them from a file or any other source.
 @everywhere function make_problem(pid)
-    pid==1 && return nothing # for now let's give process 1 an empty problem
-    return LRMSE(rand(pid,10),rand(pid)) # here the sample size is m = pid, that's arbitrary, don't do this irl
+    pid==1 && return nothing # for now, let's assign process 1 an empty problem
+    LRMSE(rand(pid,10),rand(pid)) # the sample size is `m` is set to `pid` for demonstration purposes only
 end
 ```
 
@@ -291,11 +298,11 @@ history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.));
 history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distance=(x,y)->norm(x-y,1));
 ```
 
-### `start!`
+### `start` vs `start!`
 
 `start` uses a deep copy of your algorithm and won't modify it. To enable modifications (e.g. to record information during the execution), use `start!`.
 
-### Resilience
+### Handling worker failures
 
 If you expect some workers to fail but still want the algorithm to continue running, you can set the `resilience` parameter to the maximum number of worker failures you can tolerate before the execution is terminated.
 
