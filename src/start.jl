@@ -1,4 +1,4 @@
-export start
+export start, start!
 
 using Distributed
 using DistributedObjects
@@ -10,13 +10,7 @@ using LinearAlgebra
 Solve the distributed problem returned by `problem_constructor` using the `algorithm`.
 
 # Arguments
-- `algorithm::AbstractAlgorithm{Q,A}`: should be callable with the following signatures
-    - `(algorithm::AbstractAlgorithm{Q,A})(problem::Any) where {Q,A}` the initialization step that creates the first query iterate `q::Q` 
-    - `(algorithm::AbstractAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}` is the step performed by the workers when they receive a query `q::Q` from the central node
-    - `(algorithm::AbstractAlgorithm{Q,A})(a::A, worker::Int64, problem::Any) where {Q,A}` is the step performed by the central node when receiving an answer `a::A` from a worker
-    - if `synchronous=true`, `(algorithm::AbstractAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int64}, problem::Any) where {Q,A}` is the step performed by the central node when it receives the answers `as::Vector{A}` from all the `workers::Vector{Int64}`
-    An `algorithm` can additionally define:
-    -`AsynchronousIterativeAlgorithms.stopnow(algorithm::MyAlgorithm)` (with the trait `AsynchronousIterativeAlgorithms.Stoppability(::MyAlgorithm) = Stoppable()`) to add a stopping condition to `start`'s (iterations, epochs, time) stopping condition
+- `algorithm::AbstractAlgorithm{Q,A}`: subtyping `AbstractAlgorithm{Q,A}` and implementing its functor calls
 - `problem_constructor::Function`: this function should return the process pid's problem when it calls `problem_constructor(pid::Int64)` (for any remote `pids` and on the current pid)
 - `stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}`: `(i, e, t)` or `(i, e, t, p)` 
     - `i`: maximum number of iterations
@@ -38,6 +32,10 @@ Solve the distributed problem returned by `problem_constructor` using the `algor
 
 # Throws
 - `ArgumentError`: if the arguments don't match the specifications.
+
+    start(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A,M}
+
+Solve the `distributed_problem` using the `algorithm`. Similar to the original `start` function but instead of a `problem_constructor::Function`, a `distributed_problem::DistributedObject` should be passed. `distributed_problem` should reference a problem on the remote `pids` and on the current pid.
 """
 function start(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A}
     check_arguments(algorithm, stopat, saveat, pids, synchronous, resilience)
@@ -45,11 +43,6 @@ function start(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function,
     recorded_start(recorded_algorithm, problem_constructor, pids, synchronous, resilience)
 end
 
-"""
-    start(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A,M}
-
-Solve the `distributed_problem` using the `algorithm`. Similar to the original `start` function but instead of a `problem_constructor::Function`, a `distributed_problem::DistributedObject` should be passed. `distributed_problem` should reference a problem on the remote `pids` and on the current pid.
-"""
 
 function start(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A,M}
     start(algorithm, (pid) -> distributed_problem[], stopat; saveat=saveat, save_answers=save_answers, pids=pids, synchronous=synchronous, distance=distance, resilience=resilience, verbose=verbose)
@@ -58,7 +51,12 @@ end
 """
     start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A}
 
-Same as `start` but `start` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
+Same as `start` but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
+
+    start!(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A,M}
+
+Same as `start` but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
+
 """
 function start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A}
     check_arguments(algorithm, stopat, saveat, pids, synchronous, resilience)
@@ -66,11 +64,6 @@ function start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function
     recorded_start(recorded_algorithm, problem_constructor, pids, synchronous, resilience)
 end
 
-"""
- start!(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A,M}
-
-Same as `start` but `start` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
-"""
 function start!(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A,M}
     start!(algorithm, (pid) -> distributed_problem[], stopat; saveat=saveat, save_answers=save_answers, pids=pids, synchronous=synchronous, distance=distance, resilience=resilience, verbose=verbose)
 end
