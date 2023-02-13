@@ -1,22 +1,109 @@
-# `AsynchronousIterativeAlgorithms.jl`
+# Implementation of asynchronous algorithms made easy.
 
 ```@meta
 CurrentModule = AsynchronousIterativeAlgorithms
 ```
 
+🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communications, so you to focus on designing your algorithm.
 
-```@docs
-start(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A}
+💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
+
+
+## Installation
+
+You can install `AsynchronousIterativeAlgorithms` by typing
+
+```julia
+julia> ] add AsynchronousIterativeAlgorithms
 ```
 
-```@docs
-start(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A,M}
+## Quick start
+
+Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
+
+- an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
+- the **initialisation step** where you compute the first iteration 
+- the **worker step** performed by the workers when they receive a query `q::Q` from the central node
+- the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
+
+![Sequence Diagram](assets/sequence_diagram.png)
+
+Let's first of all set up our distributed environement.
+
+```julia
+# Launch multiple processes (or remote machines)
+using Distributed; addprocs(5)
+
+# Instantiate and precompile environment in all processes
+@everywhere (using Pkg; Pkg.activate(@__DIR__); Pkg.instantiate(); Pkg.precompile())
+
+# You can now use AsynchronousIterativeAlgorithms
+@everywhere (using AsynchronousIterativeAlgorithms; const AIA = AsynchronousIterativeAlgorithms)
 ```
 
-```@docs
-start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A}
+Now to the implementation.
+  
+```julia
+@everywhere begin
+    # algorithm
+    mutable struct SGD<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
+        stepsize::Float64
+        previous_q::Vector{Float64} # previous query
+        SGD(stepsize::Float64) = new(stepsize, Vector{Float64}())
+    end
+
+    # initialisation step 
+    function (sgd::SGD)(problem::Any)
+        sgd.previous_q = rand(problem.n)
+    end
+
+    # worker step
+    function (sgd::SGD)(q::Vector{Float64}, problem::Any) 
+        sgd.stepsize * problem.∇f(q, rand(1:problem.m))
+    end
+
+    # asynchronous central step
+    function (sgd::SGD)(a::Vector{Float64}, worker::Int64, problem::Any) 
+        sgd.previous_q -= a
+    end
+end
 ```
 
-```@docs
-start!(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A,M}
+Now let's test our algorithm on a linear regression problem with mean squared error loss (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
+
+```julia
+@everywhere begin
+    struct LRMSE
+        A::Union{Matrix{Float64}, Nothing}
+        b::Union{Vector{Float64}, Nothing}
+        n::Int64
+        m::Int64
+        L::Float64 # Lipschitz constant of f
+        ∇f::Function
+    end
+
+    function LRMSE(A::Matrix{Float64}, b::Vector{Float64})
+        m, n = size(A)
+        L = maximum(A'*A)
+        ∇f(x) = A' * (A * x - b) / n
+        ∇f(x,i) = A[i,:] * (A[i,:]' * x - b[i])
+        LRMSE(A, b, n, m, L, ∇f)
+    end
+end
+```
+
+We're almost ready to start the algorithm...
+
+```julia
+# Provide the stopping criteria 
+stopat = (1000,0,0.) # (iterations, epochs, time)
+
+# Instanciate your algorithm 
+sgd = SGD(0.01)
+
+# Create a function that returns an instance of your problem for a given pid 
+problem_constructor = (pid) -> LRMSE(rand(42,10),rand(42))
+
+# And you can start!
+history = start(sgd, problem_constructor, stopat);
 ```

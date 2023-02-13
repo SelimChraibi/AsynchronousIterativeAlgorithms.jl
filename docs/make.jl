@@ -4,7 +4,10 @@ using AsynchronousIterativeAlgorithms
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms",
     format = Documenter.HTML(),
-    modules = [AsynchronousIterativeAlgorithms]
+    modules = [AsynchronousIterativeAlgorithms],
+    pages = [ "Home" => "index.md",
+            "Manual" => "manual.md",
+            "Documentation" => "documentation.md"]
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.
