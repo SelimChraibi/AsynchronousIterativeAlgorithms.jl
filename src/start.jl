@@ -10,7 +10,7 @@ using LinearAlgebra
 Solve the distributed problem returned by `problem_constructor` using the `algorithm`.
 
 # Arguments
-- `algorithm::AbstractAlgorithm{Q,A}`: subtyping `AbstractAlgorithm{Q,A}` and implementing its functor calls
+- `algorithm::AbstractAlgorithm{Q,A}`: subtyping [`AbstractAlgorithm{Q,A}`](@ref) and implementing its functor calls
 - `problem_constructor::Function`: this function should return the process pid's problem when it calls `problem_constructor(pid::Int64)` (for any remote `pids` and on the current pid)
 - `stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}`: `(i, e, t)` or `(i, e, t, p)` 
     - `i`: maximum number of iterations
@@ -51,12 +51,11 @@ end
 """
     start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A}
 
-Same as `start` but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
+Same as [`start`](@ref) but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
 
     start!(algorithm::AbstractAlgorithm{Q,A}, distributed_problem::DistributedObject{M}, stopat::Union{Tuple{Int64, Int64, Float64}, Tuple{Int64, Int64, Float64, Float64}}; saveat=(0,0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q,y::Q)->norm(x-y), resilience=0, verbose=1) where {Q,A,M}
 
-Same as `start` but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
-
+Same as [`start`](@ref) but `start!` uses a deep copy of your algorithm and won't modify it. This version enables modifications. This can be useful to record information during the execution for example.
 """
 function start!(algorithm::AbstractAlgorithm{Q,A}, problem_constructor::Function, stopat::Union{Tuple{Int64,Int64,Float64},Tuple{Int64,Int64,Float64,Float64}}; saveat=(0, 0), save_answers=false, pids=workers(), synchronous=false, distance::Function=(x::Q, y::Q) -> norm(x - y), resilience=0, verbose=1) where {Q,A}
     check_arguments(algorithm, stopat, saveat, pids, synchronous, resilience)

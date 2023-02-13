@@ -12,10 +12,10 @@ Types subtyping `AbstractAlgorithm` should be callable with the following signat
 - `(algorithm::AbstractAlgorithm{Q,A})(problem::Any) where {Q,A}` the initialization step that create the first query iterate `q::Q` 
 - `(algorithm::AbstractAlgorithm{Q,A})(q::Q, problem::Any) where {Q,A}` is the step perfromed by the wokers when they receive a query `q::Q` from the central node
 - `(algorithm::AbstractAlgorithm{Q,A})(a::A, worker::Int64, problem::Any) where {Q,A}` is the step performed by the central node when receiving an answer `a::A` from a worker
-- when `run` takes the keyword `synchronous=true`, `(algorithm::AbstractAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int64}, problem::Any) where {Q,A}` is the step performed by the central node when receiving the answers `as::Vector{A}` from all the workers in `pids`
+- when [`start`](@ref) takes the keyword `synchronous=true`, `(algorithm::AbstractAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int64}, problem::Any) where {Q,A}` is the step performed by the central node when receiving the answers `as::Vector{A}` from all the workers in `pids`
 
 They can additionally define:
--`AsynchronousIterativeAlgorithms.stopnow(algorithm::MyAlgorithm)` (with the trait `AsynchronousIterativeAlgorithms.Stoppability(::MyAlgorithm) = Stoppable()`) to add a stopping condition to `run`'s (iterations, epochs, time) stopping condition
+- `AsynchronousIterativeAlgorithms.stopnow(algorithm::MyAlgorithm)` (with the trait `AsynchronousIterativeAlgorithms.Stoppability(::MyAlgorithm) = Stoppable()`) to add a stopping condition to [`start`](@ref)'s (iterations, epochs, time) stopping condition
 """
 abstract type AbstractAlgorithm{Q,A} end
 
