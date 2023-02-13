@@ -164,6 +164,7 @@ distributed_problem = DistributedObject((pid) -> make_problem(pid), pids=procs()
 As previously noted, Option 2 should be avoided when working with large data. However, it does offer the advantage of preserving access to problems, which is not possible with Option 1. This opens up the possibility of reconstructing the global problem.
 
 ```julia
+# reconstructing global problem from problems storred locally
 function LRMSE(problems::Dict)
     pids = [pid for pid in keys(problems) if pid ≠ 1]
     n = problems[pids[1]].n
@@ -181,6 +182,7 @@ sgd = SGD(1/problems[1].L)
 *Option 3* is the best of both worlds:
 
 ```julia
+# reconstructing global problem from problems storred remotely 
 function LRMSE(d::DistributedObject)
     pids = [pid for pid in where(d) if pid ≠ 1]
     n = fetch(@spawnat pids[1] d[].n)
