@@ -18,7 +18,7 @@ julia> ] add AsynchronousIterativeAlgorithms
 
 ## Quick start
 
-Say you want to implement a distributed version of *Stochastic Gradient Descent*. You'll need to define:
+Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
 
 - an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
 - the **initialisation step** where you compute the first iteration 
@@ -68,7 +68,7 @@ Now to the implementation.
 end
 ```
 
-Now let's test our algorithm on a linear regression problem. This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
+Now let's test our algorithm on a linear regression problem (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
 
 ```julia
 @everywhere begin
