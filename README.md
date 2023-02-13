@@ -68,7 +68,7 @@ Now to the implementation.
 end
 ```
 
-Now let's test our algorithm on a linear regression problem (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
+Now let's test our algorithm on a linear regression problem with mean squared error loss (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
 
 ```julia
 @everywhere begin
