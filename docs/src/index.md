@@ -1,13 +1,12 @@
-# Implementation of asynchronous algorithms made easy.
-
 ```@meta
 CurrentModule = AsynchronousIterativeAlgorithms
 ```
+# Implementing distributed asynchronous algorithms, made easy
+
 
 🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communications, so you to focus on designing your algorithm.
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
-
 
 ## Installation
 

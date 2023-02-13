@@ -1,11 +1,17 @@
+push!(LOAD_PATH,"../src/")
+using Pkg; Pkg.activate("../"); Pkg.instantiate(); Pkg.precompile()
+include("../src/AsynchronousIterativeAlgorithms.jl")
+
 using Documenter
-using AsynchronousIterativeAlgorithms
+using .AsynchronousIterativeAlgorithms
+
+@show AsynchronousIterativeAlgorithms
 
 makedocs(
-    sitename = "AsynchronousIterativeAlgorithms",
+    sitename = "AsynchronousIterativeAlgorithms.jl",
     format = Documenter.HTML(),
     modules = [AsynchronousIterativeAlgorithms],
-    pages = [ "Home" => "index.md",
+    pages = ["Home" => "index.md",
             "Manual" => "manual.md",
             "Documentation" => "documentation.md"]
 )
