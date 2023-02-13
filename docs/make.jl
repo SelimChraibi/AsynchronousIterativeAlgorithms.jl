@@ -1,10 +1,5 @@
-using Pkg; Pkg.activate("../"); Pkg.instantiate(); Pkg.precompile()
-include("../src/AsynchronousIterativeAlgorithms.jl")
-
 using Documenter
-using .AsynchronousIterativeAlgorithms
-
-@show AsynchronousIterativeAlgorithms
+using AsynchronousIterativeAlgorithms
 
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms.jl",
