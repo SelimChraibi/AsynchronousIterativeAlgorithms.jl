@@ -1,6 +1,6 @@
 # Manual
 
-We saw how to run an asynchronous version of the SGD algorithm on a LRMSE problem in [quick start](@ref). Here we'll use this same example to look at the following:  
+We saw how to run an asynchronous version of the SGD algorithm on a LRMSE problem in [quick start](@ref quick_start). Here we'll use this same example to look at the following:  
 
   - [Working with a distributed problem](@ref)
   - [Synchronous run](@ref)
@@ -9,7 +9,7 @@ We saw how to run an asynchronous version of the SGD algorithm on a LRMSE proble
   - [Custom stopping criterion](@ref)
   - [`start` vs `start!`](@ref)
   - [Handling worker failures](@ref)
-  - [Algorithm templates](@ref)
+  - [Algorithm templates](@ref algorithm_templates)
 
 ## Working with a distributed problem
 
@@ -196,7 +196,7 @@ history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distan
 
 If you expect some workers to fail but still want the algorithm to continue running, you can set the `resilience` parameter to the maximum number of worker failures you can tolerate before the execution is terminated.
 
-## Algorithm templates
+## [Algorithm templates](@id algorithm_templates)
 
 You are free to create your own algorithms, but if you're interested in *aggregation algorithms*, you can use an implementation provided in this library. The iteration of such an algorithm performs the following computation:
 
