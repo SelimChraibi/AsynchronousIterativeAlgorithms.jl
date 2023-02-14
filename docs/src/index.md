@@ -20,7 +20,7 @@ julia> ] add AsynchronousIterativeAlgorithms
 
 Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
 
-- an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
+- an **algorithm structure** subtyping [`AbstractAlgorithm{Q,A}`](@ref)
 - the **initialisation step** where you compute the first iteration 
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
@@ -104,6 +104,6 @@ sgd = SGD(0.01)
 # Create a function that returns an instance of your problem for a given pid 
 problem_constructor = (pid) -> LRMSE(rand(42,10),rand(42))
 
-# And you can start!
+# And you can [start](@ref)!
 history = start(sgd, problem_constructor, stopat);
 ```
