@@ -32,7 +32,7 @@ Say you want to implement a distributed version of *Stochastic Gradient Descent*
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
 
-![Sequence Diagram](https://user-images.githubusercontent.com/28357890/218343892-956b638e-ede7-49d0-8209-853eb4bee63e.png "Sequence Diagram")
+![Sequence Diagram](./docs/src/assets/sequence_diagram.png "Sequence Diagram")
 
 Let's first of all set up our distributed environement.
 
