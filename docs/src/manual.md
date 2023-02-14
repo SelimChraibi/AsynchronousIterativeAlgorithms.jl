@@ -1,13 +1,15 @@
 # Manual
 
-  - [Working with a distributed problem](#working-with-a-distributed-problem)
-  - [Synchronous run](#synchronous-run)
-  - [Active processes](#active-processes)
-  - [Recording iterates](#recording-iterates)
-  - [Custom stopping criterion](#custom-stopping-criterion)
-  - [`start` vs `start!`](#start-vs-start)
-  - [Handling worker failures](#handling-worker-failures)
-  - [Algorithm templates](#algorithm-templates)
+We saw how to run an asynchronous version of the SGD algorithm on a LRMSE problem in [quick start](@ref). Here we'll use this same example to look at the following:  
+
+  - [Working with a distributed problem](@ref)
+  - [Synchronous run](@ref)
+  - [Active processes](@ref)
+  - [Recording iterates](@ref)
+  - [Custom stopping criterion](@ref)
+  - [`start` vs `start!`](@ref)
+  - [Handling worker failures](@ref)
+  - [Algorithm templates](@ref)
 
 ## Working with a distributed problem
 
