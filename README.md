@@ -48,7 +48,7 @@ using Distributed; addprocs(5)
 Now to the implementation.
   
 ```julia
-# define on all pids
+# define on all processes
 @everywhere begin
     # algorithm
     mutable struct SGD<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
