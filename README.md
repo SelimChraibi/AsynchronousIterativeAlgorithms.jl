@@ -13,6 +13,8 @@
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
 
+[📚 Full manual available here](https://selim78.github.io/AsynchronousIterativeAlgorithms.jl/dev/)
+
 ## Installation
 
 You can install `AsynchronousIterativeAlgorithms` by typing
