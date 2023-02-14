@@ -12,5 +12,5 @@ makedocs(
 
 
 deploydocs(
-    repo = "github.com/selim78/AsynchronousIterativeAlgorithms.jl.git",
+    repo = "github.com/Selim78/AsynchronousIterativeAlgorithms.jl.git",
 )
