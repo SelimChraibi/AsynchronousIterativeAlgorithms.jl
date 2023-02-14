@@ -3,7 +3,7 @@ using AsynchronousIterativeAlgorithms
 
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms.jl",
-    authors = "Selim Chraibi"
+    authors = "Selim Chraibi",
     format = Documenter.HTML(),
     modules = [AsynchronousIterativeAlgorithms],
     pages = ["Home" => "index.md",
