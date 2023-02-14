@@ -4,7 +4,7 @@ using AsynchronousIterativeAlgorithms
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms.jl",
     authors = "Selim Chraibi",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(sidebar_sitename=false),
     modules = [AsynchronousIterativeAlgorithms],
     pages = ["Home" => "index.md",
             "Manual" => "manual.md",
