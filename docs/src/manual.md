@@ -86,7 +86,7 @@ distributed_problem[] = LRMSE(distributed_problem);
 sgd = SGD(1/distributed_problem[].L)
 ```
 
-It's worth mentioning that instead of `problem_constructor::Function`, `distributed_problem::DistributedObject` can be passed to `start`. Both of the following are equivalent:
+It's worth mentioning that instead of `problem_constructor::Function`, `distributed_problem::DistributedObject` can be passed to [`start`](@ref). Both of the following are equivalent:
 
 ```julia
 history = start(sgd, (pid)-> distributed_problem[], stopat)
@@ -104,7 +104,7 @@ If you want to run your algorithm synchronously you just have to define the **sy
 end
 ```
 
-...and to add the `synchronous=true` keyword to `start`
+...and to add the `synchronous=true` keyword to [`start`](@ref)
 
 ```julia
 history = start(sgd, distributed_problem, stopat; synchronous=true);
@@ -186,7 +186,7 @@ history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.));
 history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distance=(x,y)->norm(x-y,1));
 ```
 
-## [`start`](@ref) vs `start!`
+## [`start`](@ref) vs [`start!`](@ref)
 
 `start` uses a deep copy of your algorithm and won't modify it. To enable modifications (e.g. to record information during the execution), use `start!`.
 
@@ -202,7 +202,7 @@ $$q_j \longleftarrow \textrm{query}(\underset{i \in \textrm{connected}}{\textrm{
 
 where $q_j$ is computed by the worker upon reception of $\textrm{answer}(q_i)$ from worker $j$ and where $connected$ are the list of workers that have answered.
 
-The `AggregationAlgorithm` in this library requires you to specify three methods: query, answer, and aggregate. Here's an example showing the required signatures of these three methods:
+The [`AggregationAlgorithm`](@ref) in this library requires you to specify three methods: query, answer, and aggregate. Here's an example showing the required signatures of these three methods:
 
 
 ```julia
@@ -224,7 +224,7 @@ history = start(agg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
 
 **Memory limitation:** At any point in time, the central worker should have access must have access to the latest answers $a_i$ from *all* the connected workers. This means storing a lot of $a_i$ if we use many workers. There is a workaround when the aggregation operation is an *average*. In this case only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.
 
-`AveragingAlgorithm` implements this memory optimization. Here you only need to define `query`, the `answer`
+[`AveragingAlgorithm`](@ref) implements this memory optimization. Here you only need to define `query`, the `answer`
 
 ```julia
 @everywhere begin 
