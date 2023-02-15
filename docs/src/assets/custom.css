@@ -90,6 +90,17 @@ pre .copy-button:focus, pre .copy-button:hover {
 .textarea, .input, #documenter .docs-sidebar form.docs-search > input {
     box-shadow: none;
 }
+.select select:focus, .textarea:focus, .input:focus, #documenter .docs-sidebar form.docs-search > input:focus, .select select.is-focused, .is-focused.textarea, .is-focused.input, #documenter .docs-sidebar form.docs-search > input.is-focused, .select select:active, .textarea:active, .input:active, #documenter .docs-sidebar form.docs-search > input:active, .select select.is-active, .is-active.textarea, .is-active.input, #documenter .docs-sidebar form.docs-search > input.is-active {
+    border-color: #dbdbdb;
+    box-shadow: none;
+}
+.select select:hover, .textarea:hover, .input:hover, #documenter .docs-sidebar form.docs-search > input:hover, .select select.is-hovered, .is-hovered.textarea, .is-hovered.input, #documenter .docs-sidebar form.docs-search > input.is-hovered {
+    border-color: #dbdbdb;
+}
+#documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover {
+    background-color: transparent;
+}
+
 html.theme--documenter-dark .input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input, html.theme--documenter-dark .textarea {
     border-color: #2f353b;
 }
@@ -131,7 +142,8 @@ html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, htm
 }
 
 html.theme--documenter-dark code {
-    background-color: rgba(52, 57, 65, 1);
+    /* background-color: rgba(52, 57, 65, 1); */
+    background-color: rgba(35, 42, 52, 1);
 }
 
 /* Set the style for the header [dark theme]*/
