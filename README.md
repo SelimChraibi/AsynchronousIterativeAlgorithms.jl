@@ -1,4 +1,4 @@
-# AsynchronousIterativeAlgorithms.jl
+#  ![](./docs/src/assets/favicon.gif) &nbsp;AsynchronousIterativeAlgorithms.jl
 
 |  **Build Status**                       | **Documentation**                       |
 |:---------------------------------------:|:---------------------------------------:|
