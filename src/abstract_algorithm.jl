@@ -26,15 +26,19 @@ mutable struct RecordedAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     iteration::Int64
     epoch::Int64 
     time::Float64
+    precision::Float64
+    precision_active::Bool
+    last_query::Union{Q, UndefInitializer}
     iterations::Vector{Int64}
     epochs::Vector{Int64}
     timestamps::Vector{Float64}
+    precisions::Vector{Float64}
 
     queries::Vector{Q}
     answers::Vector{A}
     save_answers::Bool
     answer_count::Dict{Int64, Int64}
-    answer_origin::Vector{Int64}
+    answers_origin::Vector{Int64}
     
     start_time::Float64
     progress_meter::Progress
@@ -48,17 +52,21 @@ mutable struct RecordedAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
         iterations = Vector{Int64}()
         epochs = Vector{Int64}()
         timestamps = Vector{Float64}()
+        precisions = Vector{Float64}()
         queries = Vector{Q}()
         answers = Vector{A}()
         answer_count = Dict(pids .=> 0)
-        answer_origin = Vector{Int64}()
+        answers_origin = Vector{Int64}()
         iteration = 0
         epoch = 0
         time = 0.
+        precision_active = length(stopat)==4
+        precision = Inf
+        last_query = undef
         start_time = 0.
         progress_meter = Progress(100; desc="Iterating:", showspeed=true, enabled=verbose>0)
 
-        new{Q,A}(algorithm, iteration, epoch, time, iterations, epochs, timestamps, queries, answers, save_answers, answer_count, answer_origin, start_time, progress_meter, stopat, saveat, distance, verbose)
+        new{Q,A}(algorithm, iteration, epoch, time, precision, precision_active, last_query, iterations, epochs, timestamps, precisions, queries, answers, save_answers, answer_count, answers_origin, start_time, progress_meter, stopat, saveat, distance, verbose)
     end
 end
 
@@ -81,6 +89,8 @@ function (ra::RecordedAlgorithm{Q,A})(problem::Any) where {Q,A}
     append!(ra.iterations, [ra.iteration])
     append!(ra.epochs, [ra.epoch])
     append!(ra.timestamps, [ra.time])
+    ra.precision_active && append!(ra.precisions, [ra.precision])
+    ra.precision_active && (ra.last_query = q)
     return q
 end
 
@@ -92,6 +102,7 @@ function (ra::RecordedAlgorithm{Q,A})(a::A, worker::Int64, problem::Any) where {
     ra.answer_count[worker] += 1
     ra.iteration += 1
     ra.time = (time_ns() - ra.start_time)/1e9
+    ra.precision_active && (ra.precision = ra.distance(q, ra.last_query); ra.last_query = q)
     all(values(ra.answer_count) .>= ra.epoch) && (ra.epoch += 1)
     update!(ra.progress_meter, progress(ra), showvalues = generate_showvalues(ra))
     
@@ -100,9 +111,12 @@ function (ra::RecordedAlgorithm{Q,A})(a::A, worker::Int64, problem::Any) where {
         append!(ra.iterations, [ra.iteration])
         append!(ra.epochs, [ra.epoch])
         append!(ra.timestamps, [ra.time])
-        if ra.save_answers
+        if ra.precision_active 
+            append!(ra.precisions, [ra.precision])
+        elseif ra.save_answers
             append!(ra.answers, [copy(a)])
-            append!(ra.answer_origin, [worker])
+            append!(ra.answers_origin, [worker])
+            ra.precision_active && append!(ra.precisions, [ra.precision])
         end 
     end
     return q
@@ -117,6 +131,7 @@ function (ra::RecordedAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int}, probl
     ra.iteration += 1
     ra.epoch += 1
     ra.time = (time_ns() - ra.start_time)/1e9
+    ra.precision_active && (ra.precision = ra.distance(q, ra.last_query); ra.last_query = q)
     update!(ra.progress_meter, progress(ra), showvalues = generate_showvalues(ra))
 
     if savenow(ra) || stopnow(ra)
@@ -124,9 +139,11 @@ function (ra::RecordedAlgorithm{Q,A})(as::Vector{A}, workers::Vector{Int}, probl
         append!(ra.iterations, [ra.iteration])
         append!(ra.epochs, [ra.epoch])
         append!(ra.timestamps, [ra.time])
-        if ra.save_answers
+        if ra.precision_active 
+            append!(ra.precisions, [ra.precision])
+        elseif ra.save_answers
             append!(ra.answers, copy(as))
-            append!(ra.answer_origin, workers)
+            append!(ra.answers_origin, workers)
         end 
     end
     q
@@ -171,7 +188,7 @@ end
 Compile the results to be outputed 
 """
 function report(ra::RecordedAlgorithm)
-    (queries=ra.queries, answers=ra.answers, iterations=ra.iterations, epochs=ra.epochs, timestamps=ra.timestamps, answer_origin=ra.answer_origin, answer_count=ra.answer_count)
+    (queries=ra.queries, answers=ra.answers, iterations=ra.iterations, epochs=ra.epochs, timestamps=ra.timestamps, answers_origin=ra.answers_origin, answer_count=ra.answer_count, precision=ra.precisions)
 end
 
 """
@@ -183,5 +200,5 @@ function stopnow(::NotStoppable, ra::RecordedAlgorithm)
     (ra.stopat[1] ≠ 0 && ra.iteration ≥ ra.stopat[1]) || 
     (ra.stopat[2] ≠ 0 && ra.epoch ≥ ra.stopat[2]) || 
     (ra.stopat[3] ≠ 0 && ra.time ≥ ra.stopat[3]) || 
-    (length(ra.stopat)==4 && length(ra.queries) > 1 && ra.distance(ra.queries[end-1], ra.queries[end]) ≤ ra.stopat[4])
+    (ra.precision_active && length(ra.queries) > 1 && ra.precision ≤ ra.stopat[4])
 end

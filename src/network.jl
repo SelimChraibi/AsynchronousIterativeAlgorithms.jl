@@ -73,8 +73,9 @@ function open_network(f::Function, Q=Any, A=Any; pids=workers(), resilience=0)
         wait(task)
     catch e
         if !isa(e, TaskFailedException)
+            throw(e)
         else
-            rethrow(e.task.exception)
+            throw(e.task.exception)
         end
     finally
         # interrupt the interruptor

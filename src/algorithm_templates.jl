@@ -1,18 +1,20 @@
 export AggregationAlgorithm, AveragingAlgorithm
 
 """
-    AggregationAlgorithm{Q,A}(initialize::Function, aggregate::Function, query::Function, answer::Function, initial_answer::A; pids=workers()) where {Q,A}
+    AggregationAlgorithm{Q,A}(args...; kwargs...) -> AggregationAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
 
 Distributed algorithm that writes: `q_j <- query(aggregate([answer(q_i) for i in connected]))`
 Where a "connected" worker is a worker that has answered at least once.
-
-The function parameters should have the following signature 
-- `initialize(problem::Any))`
-- `aggregate(a::Vector{A}, workers::Vector{Int64})` where `workers` lists the provenance of the elements of `a` 
-- `query(a::A, problem::Any)`
-- `answer(q::Q, problem::Any)`
-
 (Not memory optimized: `length(pids)` answers are stored on the central worker at all times)
+
+# Arguments
+- `initialize::Function`: with signature `initialize(problem::Any)`
+- `aggregate::Function`: with signature `aggregate(a::Vector{A}, workers::Vector{Int64})` where `workers` lists the provenance of the elements of `a` 
+- `query::Function`: with signature `query(a::A, problem::Any)`
+- `answer::Function`: with signature `answer(q::Q, problem::Any)`
+
+# Keyword
+- `pids=workers()`: 
 """
 struct AggregationAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     pids::Vector{Int64}
@@ -70,17 +72,20 @@ end
 
 
 """
-    AveragingAlgorithm{Q,A}(initialize::Function,m= query::Function, answer::Function; pids=workers(), weights=ones(length(pids))) where {Q,A}
+    AveragingAlgorithm{Q,A}(args...; kwargs...) -> AveragingAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
 
 Distributed algorithm that writes: `q_j <- query(weighted_average([answer(q_i) for i in connected]))`
 Where a "connected" worker is a worker that has answered at least once.
-
-The function parameters should have the following signature 
-- `initialize(problem::Any))`
-- `query(a::A, problem::Any)`
-- `answer(q::Q, problem::Any)`
-
 (Memory optimized: only the equivalent of one answer is stored on the central worker at all times)
+
+# Arguments
+- `initialize::Function`: with signature `initialize(problem::Any)`
+- `query::Function`: with signature `query(a::A, problem::Any)`
+- `answer::Function`: with signature `answer(q::Q, problem::Any)`
+
+# Keywords
+- `pids::Vector{Int64}=workers()`: `pids` of the active workers
+- `weights::Vector{Float64}=ones(length(pids))`: weight of each pid in the weighted average
 """
 mutable struct AveragingAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     pids::Vector{Int64}

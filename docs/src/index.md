@@ -1,7 +1,7 @@
 ```@meta
 CurrentModule = AsynchronousIterativeAlgorithms
 ```
-# AsynchronousIterativeAlgorithms.jl
+# [AsynchronousIterativeAlgorithms.jl](https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl)
 
 
 🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communications, so you can focus on designing your algorithm.
