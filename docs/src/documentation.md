@@ -10,7 +10,7 @@ start
 start!
 ```
 
-## Algorithm
+## `AbstractAlgorithm`
 
 The algorithm you pass to [`start`](@ref) should subtype `AbstractAlgorithm{Q,A}`.
 
