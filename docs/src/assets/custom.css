@@ -65,6 +65,7 @@ a:visited {
 a:hover {
   color: #0366d6;
   /* text-decoration: underline; */
+  text-decoration: none;
 }
 
 /* Set the style for code blocks */
@@ -238,7 +239,8 @@ color: #58a6ff;
 /* Set the color for links when hovering over them */
 html.theme--documenter-dark a:hover {
 color: #58a6ff;
-text-decoration: underline;
+/* text-decoration: underline; */
+text-decoration: none;
 }
 
 /* Set the style for methods and type documentation [dark theme] */
