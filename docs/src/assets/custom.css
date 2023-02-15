@@ -1,0 +1,429 @@
+.docs-logo > img {
+    max-height: 12rem !important;
+}
+
+#documenter .docs-main {
+    max-width: 55rem !important;
+}
+
+/* ###### */
+
+
+/* Set the background for the menu */
+#documenter .docs-sidebar {
+    background-color: #f6f8fa
+}
+#documenter .docs-sidebar ul.docs-menu .tocitem, #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
+    background-color: #f6f8fa
+}
+
+/* Set the style for methods and type documentation */
+.docstring > header {
+    background-color: #f6f8fa
+}
+
+/* Set the font family and font size for the entire document */
+body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Set the font family and font size for the entire document [dark theme]*/
+html.theme--documenter-dark body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* No menu shadow */
+#documenter .docs-sidebar.visible {
+    box-shadow: none;
+}
+
+/* No menu shadow [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar.visible {
+    box-shadow: none;
+}
+
+/* Set the link color to GitHub's default blue */
+a {
+  color: #0366d6;
+}
+
+/* Remove the underline from links */
+a {
+  text-decoration: none;
+}
+
+/* Set the color for visited links */
+a:visited {
+  color: #0366d6;
+}
+
+/* Set the color for links when hovering over them */
+a:hover {
+  color: #0366d6;
+  /* text-decoration: underline; */
+}
+
+/* Set the style for code blocks */
+code, pre {
+    font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+    border-radius: 6px;
+    background-color: color(srgb 0.9655 0.9725 0.981);
+}
+.content pre {
+    border: none;
+}
+
+/* Set the style for the copy button */
+pre .copy-button:focus, pre .copy-button:hover {
+    background: none;
+}
+
+/* Set the style for search bars */
+.tag.is-rounded:not(body), #documenter .docs-sidebar form.docs-search > input:not(body), .content kbd.is-rounded:not(body), #documenter .docs-sidebar .content form.docs-search > input:not(body), .docstring > section > a.docs-sourcelink.is-rounded:not(body) {
+    border-radius: 6px;
+}
+.textarea, .input, #documenter .docs-sidebar form.docs-search > input {
+    box-shadow: none;
+}
+html.theme--documenter-dark .input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input, html.theme--documenter-dark .textarea {
+    border-color: #2f353b;
+}
+html.theme--documenter-dark .select select:hover, html.theme--documenter-dark .textarea:hover, html.theme--documenter-dark .input:hover, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input:hover, html.theme--documenter-dark .select select.is-hovered, html.theme--documenter-dark .is-hovered.textarea, html.theme--documenter-dark .is-hovered.input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input.is-hovered {
+    border-color: #2f353b;
+}
+html.theme--documenter-dark .select select:focus, html.theme--documenter-dark .textarea:focus, html.theme--documenter-dark .input:focus, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input:focus, html.theme--documenter-dark .select select.is-focused, html.theme--documenter-dark .is-focused.textarea, html.theme--documenter-dark .is-focused.input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input.is-focused, html.theme--documenter-dark .select select:active, html.theme--documenter-dark .textarea:active, html.theme--documenter-dark .input:active, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input:active, html.theme--documenter-dark .select select.is-active, html.theme--documenter-dark .is-active.textarea, html.theme--documenter-dark .is-active.input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input.is-active {
+    border-color: #2f353b;
+    box-shadow: none;
+}
+
+/* Set the style for methods and type documentation */
+.docstring {
+    box-shadow: none;
+    border-radius: 6px;
+}
+.docstring > header {
+    border-radius: 6px 6px 0px 0px;
+}
+
+/* Text color */
+html.theme--documenter-dark body, html.theme--documenter-dark html, html.theme--documenter-dark body, html.theme--documenter-dark .content table th, html.theme--documenter-dark strong, html.theme--documenter-dark p, html.theme--documenter-dark ol, html.theme--documenter-dark ul, html.theme--documenter-dark li, html.theme--documenter-dark dl, html.theme--documenter-dark dt, html.theme--documenter-dark dd, html.theme--documenter-dark blockquote, html.theme--documenter-dark figure, html.theme--documenter-dark fieldset, html.theme--documenter-dark legend, html.theme--documenter-dark textarea, html.theme--documenter-dark pre, html.theme--documenter-dark iframe, html.theme--documenter-dark hr, html.theme--documenter-dark h1, html.theme--documenter-dark h2, html.theme--documenter-dark h3, html.theme--documenter-dark h4, html.theme--documenter-dark h5, html.theme--documenter-dark h6 {
+    color: #c9d1da
+}
+html.theme--documenter-dark h1 .docs-heading-anchor, html.theme--documenter-dark h1 .docs-heading-anchor:hover, html.theme--documenter-dark h1 .docs-heading-anchor:visited, html.theme--documenter-dark h2 .docs-heading-anchor, html.theme--documenter-dark h2 .docs-heading-anchor:hover, html.theme--documenter-dark h2 .docs-heading-anchor:visited, html.theme--documenter-dark h3 .docs-heading-anchor, html.theme--documenter-dark h3 .docs-heading-anchor:hover, html.theme--documenter-dark h3 .docs-heading-anchor:visited, html.theme--documenter-dark h4 .docs-heading-anchor, html.theme--documenter-dark h4 .docs-heading-anchor:hover, html.theme--documenter-dark h4 .docs-heading-anchor:visited, html.theme--documenter-dark h5 .docs-heading-anchor, html.theme--documenter-dark h5 .docs-heading-anchor:hover, html.theme--documenter-dark h5 .docs-heading-anchor:visited, html.theme--documenter-dark h6 .docs-heading-anchor, html.theme--documenter-dark h6 .docs-heading-anchor:hover, html.theme--documenter-dark h6 .docs-heading-anchor:visited {
+    color: #c9d1da
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover {
+    color:  #c9d1da
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover {
+    color:  #c9d1da
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu a.tocitem:hover, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu label.tocitem:hover {
+    color:  #c9d1da
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
+    color:  #c9d1da
+}
+
+html.theme--documenter-dark code {
+    background-color: rgba(52, 57, 65, 1);
+}
+
+/* Set the style for the header [dark theme]*/
+html.theme--documenter-dark #documenter .docs-main header.docs-navbar {
+    background-color: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+/* Set the style for code blocks [dark theme]*/
+html.theme--documenter-dark .content pre {
+    border: none;
+}
+
+/* Set the page background color [dark theme]*/
+html.theme--documenter-dark {
+    background-color: #0d1117;
+}
+/* Set the header background color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-main header.docs-navbar {
+    background-color: #0d1117;
+}
+
+/* Set the sidebar background color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar {
+    background-color: #161b22;
+    border-right: 1px solid #2f353b;
+}
+
+/* Set the highlight color [dark theme]*/
+html.theme--documenter-dark pre {
+    background-color: #343941;
+}
+
+/* Set the menu background color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active {
+    background-color: #161b22;
+    border-top: none; /* 1px solid #2b3138; */
+    border-bottom: none;
+}
+/* Button menu sidebar [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
+    background: #21262d;
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover {
+    background-color: #1f6feb;
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu a.tocitem:hover, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu label.tocitem:hover {
+    background-color: #1f6feb;
+}
+
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu ul.internal {
+    border-top: none;
+}
+
+/* Set the menu button color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
+    background: #161b22;
+}
+
+/* Set the menu borders [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu {
+    border-top: 1px solid #30363d;
+}
+
+/* Set the sub-menu button color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem, html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active .tocitem:hover {
+    background-color: transparent;
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active ul.internal .tocitem:hover {
+    background-color: transparent;
+}
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active {
+    padding-bottom: 8px !important;
+}
+
+/* Set the sub-menu background color [dark theme]*/
+html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu li.is-active {
+    background-color: #0d1117;
+}
+
+/* Set the style for search bars [dark theme]*/
+html.theme--documenter-dark .tag.is-rounded:not(body), html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input:not(body), html.theme--documenter-dark .content kbd.is-rounded:not(body), html.theme--documenter-dark #documenter .docs-sidebar .content form.docs-search > input:not(body), html.theme--documenter-dark .docstring > section > a.docs-sourcelink.is-rounded:not(body) {
+    border-radius: 6px;
+}
+html.theme--documenter-dark .select select, html.theme--documenter-dark .textarea, html.theme--documenter-dark .input, html.theme--documenter-dark #documenter .docs-sidebar form.docs-search > input {
+    background-color: transparent;
+}
+
+
+/* Set the color for links when hovering over them [dark theme]*/
+html.theme--documenter-dark a {
+    color: #58a6ff;
+}
+  
+/* Remove the underline from links */
+html.theme--documenter-dark a {
+text-decoration: none;
+}
+
+/* Set the color for visited links */
+html.theme--documenter-dark a:visited {
+color: #58a6ff;
+}
+
+/* Set the color for links when hovering over them */
+html.theme--documenter-dark a:hover {
+color: #58a6ff;
+text-decoration: underline;
+}
+
+/* Set the style for methods and type documentation [dark theme] */
+html.theme--documenter-dark .docstring > header {
+    background-color: #161b22;
+    box-shadow: none;
+    border-bottom: 1px solid #21262d;
+}
+html.theme--documenter-dark .docstring {
+    border: 1px solid #30363d;
+    box-shadow: none;
+}
+
+/* Set the style for code blocks [dark theme] */
+html.theme--documenter-dark pre {
+    background-color: #161b22;
+}
+
+
+
+
+/* Light then dark highlighting for code */
+
+
+.hljs-comment {
+    color: #747d87;
+    font-style: italic;
+    }
+    
+    .hljs-tag,
+    .hljs-punctuation {
+    color: #d73a49;
+    }
+    
+    .hljs-tag .hljs-name,
+    .hljs-tag .hljs-attr {
+    color: #6f42c1;
+    }
+    
+    .hljs-keyword,
+    .hljs-attribute,
+    .hljs-selector-tag,
+    .hljs-meta .hljs-keyword,
+    .hljs-doctag,
+    .hljs-name {
+    color: #cf222e;
+    font-weight: normal;
+    }
+    
+    /* User color: hue: 0 */
+    
+    .hljs-type,
+    .hljs-string,
+    .hljs-number,
+    .hljs-selector-id,
+    .hljs-selector-class,
+    .hljs-quote,
+    .hljs-template-tag,
+    .hljs-deletion {
+    color: #032f62;
+    }
+    
+    .hljs-title,
+    .hljs-section {
+    color: #005cc5;
+    font-weight: bold;
+    }
+    
+    .hljs-regexp,
+    .hljs-symbol,
+    .hljs-variable,
+    .hljs-template-variable,
+    .hljs-link,
+    .hljs-selector-attr,
+    .hljs-operator,
+    .hljs-selector-pseudo {
+    color: #e36209;
+    }
+    
+    /* Language color: hue: 90; */
+    
+    .hljs-literal {
+    color: #22863a;
+    }
+    
+    .hljs-built_in,
+    .hljs-bullet,
+    .hljs-code,
+    .hljs-addition {
+    color: #005cc5;
+    }
+    
+    /* Meta color: hue: 200 */
+    
+    .hljs-meta {
+    color: #1e52af;
+    }
+    
+    .hljs-meta .hljs-string {
+    color: #032f62;
+    }
+    
+    /* Misc effects */
+    
+    .hljs-emphasis {
+    font-style: italic;
+    }
+    
+
+
+html.theme--documenter-dark code.language-julia-repl > span.hljs-meta {
+    color: #50a14f;
+    font-weight: bolder; }
+  
+  html.theme--documenter-dark .hljs {
+    background: #1b1f23;
+    color: #c8c6c2; }
+  
+  html.theme--documenter-dark .hljs-comment,
+  html.theme--documenter-dark .hljs-quote {
+    color: #6a737d; 
+    font-style: italic;}
+  
+  html.theme--documenter-dark .hljs-variable,
+  html.theme--documenter-dark .hljs-template-variable,
+  html.theme--documenter-dark .hljs-tag,
+  html.theme--documenter-dark .hljs-name,
+  html.theme--documenter-dark .hljs-selector-id,
+  html.theme--documenter-dark .hljs-selector-class,
+  html.theme--documenter-dark .hljs-regexp,
+  html.theme--documenter-dark .hljs-deletion {
+    color: #e5534b; }
+  
+  html.theme--documenter-dark .hljs-number,
+  html.theme--documenter-dark .hljs-built_in,
+  html.theme--documenter-dark .hljs-literal,
+  html.theme--documenter-dark .hljs-type,
+  html.theme--documenter-dark .hljs-params,
+  html.theme--documenter-dark .hljs-meta,
+  html.theme--documenter-dark .hljs-link {
+    color: #79c0ff; }
+  
+  html.theme--documenter-dark .hljs-attribute {
+    color: #d19a66; }
+  
+  html.theme--documenter-dark .hljs-string,
+  html.theme--documenter-dark .hljs-symbol,
+  html.theme--documenter-dark .hljs-bullet,
+  html.theme--documenter-dark .hljs-addition {
+    color: #c6c5fe; }
+  
+  html.theme--documenter-dark .hljs-title,
+  html.theme--documenter-dark .hljs-section {
+    color: #9cdcfe; }
+  
+  html.theme--documenter-dark .hljs-keyword,
+  html.theme--documenter-dark .hljs-selector-tag {
+    color: #f67b73; }
+  
+  html.theme--documenter-dark .hljs-emphasis {
+    font-style: italic; }
+  
+  html.theme--documenter-dark .hljs-strong {
+    font-weight: bold; }
+  
+  @media screen and (-ms-high-contrast: active) {
+    html.theme--documenter-dark .hljs-addition,
+    html.theme--documenter-dark .hljs-attribute,
+    html.theme--documenter-dark .hljs-built_in,
+    html.theme--documenter-dark .hljs-bullet,
+    html.theme--documenter-dark .hljs-comment,
+    html.theme--documenter-dark .hljs-link,
+    html.theme--documenter-dark .hljs-literal,
+    html.theme--documenter-dark .hljs-meta,
+    html.theme--documenter-dark .hljs-number,
+    html.theme--documenter-dark .hljs-params,
+    html.theme--documenter-dark .hljs-string,
+    html.theme--documenter-dark .hljs-symbol,
+    html.theme--documenter-dark .hljs-type,
+    html.theme--documenter-dark .hljs-quote {
+      color: highlight; }
+    html.theme--documenter-dark .hljs-keyword,
+    html.theme--documenter-dark .hljs-selector-tag {
+      font-weight: bold; } }
+  
+  html.theme--documenter-dark .hljs-subst {
+    color: #c8c6c2; }
+  
