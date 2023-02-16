@@ -9,7 +9,7 @@
 [build-img]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml/badge.svg?branch=main
 [build-url]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml?query=branch%3Amain
 
-🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communication, so you can focus on designing your algorithm.
+🧮 `AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communication, so you can focus on designing your algorithm.
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
 

@@ -4,7 +4,7 @@ CurrentModule = AsynchronousIterativeAlgorithms
 # [AsynchronousIterativeAlgorithms.jl](https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl)
 
 
-🧮`AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communications, so you can focus on designing your algorithm.
+🧮 `AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communications, so you can focus on designing your algorithm.
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
 
