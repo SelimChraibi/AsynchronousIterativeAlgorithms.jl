@@ -192,7 +192,7 @@ end
 Function used in `record` as an argument of `ProgressMeter.next!`
 """
 function generate_showvalues(ra::RecordedAlgorithm)
-    () -> append!([(:iterations, ra.iteration), (:epochs, ra.epoch), (:answers, string(ra.answer_count)[6:end-1])], ra.precision_active ? [(:precision, ra.precision)] : [])
+    () -> append!([(:iterations, ra.iteration), (:epochs, ra.epoch), (:answers, string(ra.answer_count)[6:end-1])], ra.precision_active ? [(:precision, round(ra.precision; sigdigits=4))] : [])
 end
 
 """
