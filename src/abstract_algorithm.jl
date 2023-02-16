@@ -70,11 +70,6 @@ mutable struct RecordedAlgorithm{Q,A} <: AbstractAlgorithm{Q,A}
     end
 end
 
-abstract type Stoppability end
-struct Stoppable <: Stoppability end
-struct NotStoppable <: Stoppability end
-Stoppability(::AbstractAlgorithm) = NotStoppable()
-
 
 """
 Initialise
@@ -177,11 +172,27 @@ function progress(ra::RecordedAlgorithm{Q,A}) where {Q,A}
     ceil(Int64, output)
 end
 
+abstract type Stoppability end
+struct Stoppable <: Stoppability end
+struct NotStoppable <: Stoppability end
+Stoppability(::AbstractAlgorithm) = NotStoppable()
+"""
+Return true if the stopping condition has been reached
+"""
+stopnow(ra::RecordedAlgorithm) = stopnow(Stoppability(ra.algorithm), ra)
+stopnow(::Stoppable, ra::RecordedAlgorithm) = stopnow(ra.algorithm) || stopnow(NotStoppable(), ra)
+function stopnow(::NotStoppable, ra::RecordedAlgorithm)
+    (ra.stopat[1] ≠ 0 && ra.iteration ≥ ra.stopat[1]) || 
+    (ra.stopat[2] ≠ 0 && ra.epoch ≥ ra.stopat[2]) || 
+    (ra.stopat[3] ≠ 0 && ra.time ≥ ra.stopat[3]) || 
+    (ra.precision_active && ra.iteration > 1 && ra.precision ≤ ra.stopat[4])
+end
+
 """
 Function used in `record` as an argument of `ProgressMeter.next!`
 """
 function generate_showvalues(ra::RecordedAlgorithm)
-    () -> [(:iterations, ra.iteration), (:epochs, ra.epoch), (:answers, string(ra.answer_count)[6:end-1])]  
+    () -> append!([(:iterations, ra.iteration), (:epochs, ra.epoch), (:answers, string(ra.answer_count)[6:end-1])], ra.precision_active ? [(:precision, ra.precision)] : [])
 end
 
 """
@@ -189,16 +200,4 @@ Compile the results to be outputed
 """
 function report(ra::RecordedAlgorithm)
     (queries=ra.queries, answers=ra.answers, iterations=ra.iterations, epochs=ra.epochs, timestamps=ra.timestamps, answers_origin=ra.answers_origin, answer_count=ra.answer_count, precision=ra.precisions)
-end
-
-"""
-Return true if the stopping condition has been reached
-"""
-stopnow(ra::RecordedAlgorithm) = stopnow(Stoppability(ra.algorithm), ra)
-stopnow(::Stoppable, ra::RecordedAlgorithm)= stopnow(ra.algorithm) || stopnow(NotStoppable(), ra)
-function stopnow(::NotStoppable, ra::RecordedAlgorithm)
-    (ra.stopat[1] ≠ 0 && ra.iteration ≥ ra.stopat[1]) || 
-    (ra.stopat[2] ≠ 0 && ra.epoch ≥ ra.stopat[2]) || 
-    (ra.stopat[3] ≠ 0 && ra.time ≥ ra.stopat[3]) || 
-    (ra.precision_active && length(ra.queries) > 1 && ra.precision ≤ ra.stopat[4])
 end

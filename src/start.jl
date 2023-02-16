@@ -110,14 +110,14 @@ function start_central(network::Network{Q,A}, recorded_algorithm::RecordedAlgori
     send_query(network, q)
 
     if !synchronous
-        while !stopnow(recorded_algorithm) #&& isopen(network) 
+        while !stopnow(recorded_algorithm)
             a, worker = get_answer(network)
             q = recorded_algorithm(a, worker, problem)
             send_query(network, q, worker)
         end
     else
         npid = length(network.pids)
-        while !stopnow(recorded_algorithm) #&& isopen(network) 
+        while !stopnow(recorded_algorithm)
             as, workers = Vector{A}(undef, npid), Vector{Int64}(undef, npid)
             for i in 1:npid
                 as[i], workers[i] = get_answer(network)
