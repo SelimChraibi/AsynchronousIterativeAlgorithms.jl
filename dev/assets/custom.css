@@ -16,6 +16,9 @@
 #documenter .docs-sidebar ul.docs-menu .tocitem, #documenter .docs-sidebar ul.docs-menu .tocitem:hover {
     background-color: #f6f8fa
 }
+#documenter .docs-sidebar ul.docs-menu a.tocitem:hover, #documenter .docs-sidebar ul.docs-menu label.tocitem:hover {
+    background-color: #ebeff2;
+}
 
 /* Set the style for methods and type documentation */
 .docstring > header {
