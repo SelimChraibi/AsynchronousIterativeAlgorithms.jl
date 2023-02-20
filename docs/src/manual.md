@@ -150,7 +150,7 @@ Let's look at a slightly modified version of `SGD` where we track the *"precisio
         previous_q::Vector{Float64}
         precision::Float64  # will hold the distance between the last two iterates
         precisions::Vector{Float64} # record of all the precisions 
-        SGDbis(stepsize::Float64) = new(stepsize, Vector{Float64}(), Inf, Vector{Float64}())
+        SGDbis(stepsize::Float64) = new(stepsize, Float64[], Inf, Float64[])
     end
     
     # no changes
