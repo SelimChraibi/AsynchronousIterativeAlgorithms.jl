@@ -269,8 +269,8 @@ The [`AggregationAlgorithm`](@ref) in this library requires you to specify three
     using Statistics
 
     struct ToBeAggregatedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
-        stepsize::Float64 
         q1::Vector{Float64}
+        stepsize::Float64 
     end
 
     (tba::ToBeAggregatedGD)(problem::Any) = tba.q1
@@ -279,7 +279,7 @@ The [`AggregationAlgorithm`](@ref) in this library requires you to specify three
     (tba::ToBeAggregatedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
-algorithm = AggregationAlgorithm(ToBeAggregatedGD(0.01, rand(10)); pids=workers())
+algorithm = AggregationAlgorithm(ToBeAggregatedGD(rand(10), 0.01); pids=workers())
 
 history = start(algorithm, distributed_problem, (epoch=100,));
 ```
@@ -291,8 +291,8 @@ history = start(algorithm, distributed_problem, (epoch=100,));
 ```julia
 @everywhere begin 
     struct ToBeAveragedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
-        stepsize::Float64 
         q1::Vector{Float64}
+        stepsize::Float64 
     end
 
     (tba::ToBeAveragedGD)(problem::Any) = tba.q1
@@ -300,7 +300,7 @@ history = start(algorithm, distributed_problem, (epoch=100,));
     (tba::ToBeAveragedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
-algorithm = AveragingAlgorithm(ToBeAveragedGD(0.01, rand(10)); pids=workers(), weights=ones(nworkers()))
+algorithm = AveragingAlgorithm(ToBeAveragedGD(rand(10), 0.01); pids=workers(), weights=ones(nworkers()))
 
 history = start(algorithm, distributed_problem, (epoch=100,));
 ```
