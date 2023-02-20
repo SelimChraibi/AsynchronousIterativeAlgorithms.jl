@@ -23,7 +23,7 @@ You can install `AsynchronousIterativeAlgorithms` by typing
 julia> ] add AsynchronousIterativeAlgorithms
 ```
 
-## [Quick start](@id quick_start)
+## Quick start
 
 Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
 
