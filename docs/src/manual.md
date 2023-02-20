@@ -290,8 +290,6 @@ history = start(algorithm, distributed_problem, (epoch=100,));
 
 ```julia
 @everywhere begin 
-    using Statistics
-
     struct ToBeAveragedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64 
         q0::Vector{Float64}
