@@ -5,7 +5,7 @@ We saw how to run an asynchronous version of the SGD algorithm on a LRMSE proble
   - [Working with a distributed problem](@ref)
   - [Synchronous run](@ref)
   - [Active processes](@ref)
-  - [Recording iterates](@ref)
+  - [Recording iterates](@ref recording_iterated)
   - [Customization of `start`'s execution](@ref custom_execution)
   - [Handling worker failures](@ref)
   - [Algorithm wrappers](@ref algorithm_wrappers)
@@ -262,7 +262,7 @@ $$q_j \longleftarrow \textrm{query}(\underset{i \in \textrm{connected}}{\textrm{
 
 where $q_j$ is computed by the worker upon reception of $\textrm{answer}(q_i)$ from worker $j$ and where $connected$ are the list of workers that have answered.
 
-The [`AggregationAlgorithm`](@ref) in this library requires you to specify three methods: query, answer, and aggregate. Here's an example showing the required signatures of these three methods:
+The [`AggregationAlgorithm`](@ref) in this library requires you to define four methods: `initialize`, `query`, `answer`, and `aggregate`. Here's an example showing the required signatures of these three methods:
 
 ```julia
 @everywhere begin 
@@ -273,10 +273,10 @@ The [`AggregationAlgorithm`](@ref) in this library requires you to specify three
         stepsize::Float64 
     end
 
-    (tba::ToBeAggregatedGD)(problem::Any) = tba.q1
-    (tba::ToBeAggregatedGD)(a::Vector{Vector{Float64}}, connected::Vector{Int64}) = mean(a)            
-    (tba::ToBeAggregatedGD)(a::Vector{Float64}, problem::Any) = a
-    (tba::ToBeAggregatedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
+    AIA.initialize(tba::ToBeAggregatedGD, problem::Any) = tba.q1
+    AIA.aggregate(tba::ToBeAggregatedGD, a::Vector{Vector{Float64}}, connected::Vector{Int64}) = mean(a)            
+    AIA.query(tba::ToBeAggregatedGD, a::Vector{Float64}, problem::Any) = a
+    AIA.answer(tba::ToBeAggregatedGD, q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
 algorithm = AggregationAlgorithm(ToBeAggregatedGD(rand(10), 0.01); pids=workers())
@@ -286,7 +286,7 @@ history = start(algorithm, distributed_problem, (epoch=100,));
 
 **Memory limitation:** At any point in time, the central worker should have access must have access to the latest answers $a_i$ from *all* the connected workers. This means storing a lot of $a_i$ if we use many workers. There is a workaround when the aggregation operation is an *average*. In this case, only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.
 
-[`AveragingAlgorithm`](@ref) implements this memory optimization. Here you only need to define `query`, the `answer`
+[`AveragingAlgorithm`](@ref) implements this memory optimization. Here you only need to define `initialize`, `query`, the `answer`
 
 ```julia
 @everywhere begin 
@@ -295,9 +295,9 @@ history = start(algorithm, distributed_problem, (epoch=100,));
         stepsize::Float64 
     end
 
-    (tba::ToBeAveragedGD)(problem::Any) = tba.q1
-    (tba::ToBeAveragedGD)(a::Vector{Float64}, problem::Any) = a
-    (tba::ToBeAveragedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
+    AIA.initialize(tba::ToBeAveragedGD, problem::Any) = tba.q1
+    AIA.query(tba::ToBeAveragedGD, a::Vector{Float64}, problem::Any) = a
+    AIA.answer(tba::ToBeAveragedGD, q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
 algorithm = AveragingAlgorithm(ToBeAveragedGD(rand(10), 0.01); pids=workers(), weights=ones(nworkers()))
@@ -311,5 +311,6 @@ Note that you can implement the [custom callbacks](@ref custom_execution) on bot
 report(::ToBeAggregatedGD) = # do something
 ```
 
+---
 
-Hope you find this library helpful and look forward to seeing how you put it to use!
+Wow you read all this! Hope you find this library helpful and look forward to seeing how you put it to use!
