@@ -270,10 +270,10 @@ The [`AggregationAlgorithm`](@ref) in this library requires you to specify three
 
     struct ToBeAggregatedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64 
-        q0::Vector{Float64}
+        q1::Vector{Float64}
     end
 
-    (tba::ToBeAggregatedGD)(problem::Any) = tba.q0
+    (tba::ToBeAggregatedGD)(problem::Any) = tba.q1
     (tba::ToBeAggregatedGD)(a::Vector{Vector{Float64}}, connected::Vector{Int64}) = mean(a)            
     (tba::ToBeAggregatedGD)(a::Vector{Float64}, problem::Any) = a
     (tba::ToBeAggregatedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
@@ -292,10 +292,10 @@ history = start(algorithm, distributed_problem, (epoch=100,));
 @everywhere begin 
     struct ToBeAveragedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64 
-        q0::Vector{Float64}
+        q1::Vector{Float64}
     end
 
-    (tba::ToBeAveragedGD)(problem::Any) = tba.q0
+    (tba::ToBeAveragedGD)(problem::Any) = tba.q1
     (tba::ToBeAveragedGD)(a::Vector{Float64}, problem::Any) = a
     (tba::ToBeAveragedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
