@@ -88,8 +88,8 @@ end</code></pre><h2 id="Handling-worker-failures"><a class="docs-heading-anchor"
     using Statistics
 
     struct ToBeAggregatedGD &lt;: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
-        stepsize::Float64 
         q1::Vector{Float64}
+        stepsize::Float64 
     end
 
     (tba::ToBeAggregatedGD)(problem::Any) = tba.q1
@@ -98,12 +98,12 @@ end</code></pre><h2 id="Handling-worker-failures"><a class="docs-heading-anchor"
     (tba::ToBeAggregatedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
-algorithm = AggregationAlgorithm(ToBeAggregatedGD(0.01, rand(10)); pids=workers())
+algorithm = AggregationAlgorithm(ToBeAggregatedGD(rand(10), 0.01); pids=workers())
 
 history = start(algorithm, distributed_problem, (epoch=100,));</code></pre><p><strong>Memory limitation:</strong> At any point in time, the central worker should have access must have access to the latest answers <span>$a_i$</span> from <em>all</em> the connected workers. This means storing a lot of <span>$a_i$</span> if we use many workers. There is a workaround when the aggregation operation is an <em>average</em>. In this case, only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.</p><p><a href="../documentation/#AsynchronousIterativeAlgorithms.AveragingAlgorithm"><code>AveragingAlgorithm</code></a> implements this memory optimization. Here you only need to define <code>query</code>, the <code>answer</code></p><pre><code class="language-julia hljs">@everywhere begin 
     struct ToBeAveragedGD &lt;: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
-        stepsize::Float64 
         q1::Vector{Float64}
+        stepsize::Float64 
     end
 
     (tba::ToBeAveragedGD)(problem::Any) = tba.q1
@@ -111,6 +111,6 @@ history = start(algorithm, distributed_problem, (epoch=100,));</code></pre><p><s
     (tba::ToBeAveragedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
-algorithm = AveragingAlgorithm(ToBeAveragedGD(0.01, rand(10)); pids=workers(), weights=ones(nworkers()))
+algorithm = AveragingAlgorithm(ToBeAveragedGD(rand(10), 0.01); pids=workers(), weights=ones(nworkers()))
 
-history = start(algorithm, distributed_problem, (epoch=100,));</code></pre><p>Note that you can implement the <a href="#custom_execution">custom callbacks</a> on both these algorithms by defining them on your algorithm:</p><pre><code class="language-julia hljs">report(::ToBeAggregatedGD) = # do something</code></pre><p>Hope you find this library helpful and look forward to seeing how you put it to use!</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../documentation/">Documentation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Monday 20 February 2023 09:27">Monday 20 February 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+history = start(algorithm, distributed_problem, (epoch=100,));</code></pre><p>Note that you can implement the <a href="#custom_execution">custom callbacks</a> on both these algorithms by defining them on your algorithm:</p><pre><code class="language-julia hljs">report(::ToBeAggregatedGD) = # do something</code></pre><p>Hope you find this library helpful and look forward to seeing how you put it to use!</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../documentation/">Documentation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Monday 20 February 2023 09:33">Monday 20 February 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
