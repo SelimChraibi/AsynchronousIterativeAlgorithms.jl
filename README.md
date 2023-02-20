@@ -23,18 +23,18 @@ You can install `AsynchronousIterativeAlgorithms` by typing
 julia> ] add AsynchronousIterativeAlgorithms
 ```
 
-## Quick start
+## [Quick start](@id quick_start)
 
 Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
 
 - an **algorithm structure** subtyping `AbstractAlgorithm{Q,A}`
-- the **initialisation step** where you compute the first iteration 
+- the **initialization step** where you compute the first iteration 
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
 
-![Sequence Diagram](./docs/src/assets/sequence_diagram.png "Sequence Diagram")
+![Sequence Diagram](docs/assets/sequence_diagram.png)
 
-Let's first of all set up our distributed environement.
+Let's first of all set up our distributed environment.
 
 ```julia
 # Launch multiple processes (or remote machines)
@@ -76,7 +76,7 @@ Now to the implementation.
 end
 ```
 
-Let's test our algorithm on a linear regression problem with mean squared error loss (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
+Now let's test our algorithm on a linear regression problem with mean squared error loss (LRMSE). This problem must be **compatible with your algorithm**. In this example, it means providing attributes `n` and `m` (dimension of the regressor and number of points), and the method `∇f(x::Vector{Float64}, i::Int64)` (gradient of the linear regression loss on the ith data point)
 
 ```julia
 @everywhere begin
@@ -103,7 +103,7 @@ We're almost ready to start the algorithm...
 
 ```julia
 # Provide the stopping criteria 
-stopat = (1000,0,0.) # (iterations, epochs, time)
+stopat = (iteration=1000, time=42.)
 
 # Instanciate your algorithm 
 sgd = SGD(0.01)
