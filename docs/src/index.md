@@ -21,13 +21,13 @@ julia> ] add AsynchronousIterativeAlgorithms
 Say you want to implement a distributed version of *Stochastic Gradient Descent* (SGD). You'll need to define:
 
 - an **algorithm structure** subtyping [`AbstractAlgorithm{Q,A}`](@ref)
-- the **initialisation step** where you compute the first iteration 
+- the **initialization step** where you compute the first iteration 
 - the **worker step** performed by the workers when they receive a query `q::Q` from the central node
 - the asynchronous **central step** performed by the central node when it receives an answer `a::A` from a `worker`
 
 ![Sequence Diagram](assets/sequence_diagram.png)
 
-Let's first of all set up our distributed environement.
+Let's first of all set up our distributed environment.
 
 ```julia
 # Launch multiple processes (or remote machines)
@@ -49,7 +49,7 @@ Now to the implementation.
     mutable struct SGD<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64
         previous_q::Vector{Float64} # previous query
-        SGD(stepsize::Float64) = new(stepsize, Vector{Float64}())
+        SGD(stepsize::Float64) = new(stepsize, Float64[])
     end
 
     # initialisation step 
@@ -96,7 +96,7 @@ We're almost ready to start the algorithm...
 
 ```julia
 # Provide the stopping criteria 
-stopat = (1000,0,0.) # (iterations, epochs, time)
+stopat = (iteration=1000, time=42.)
 
 # Instanciate your algorithm 
 sgd = SGD(0.01)

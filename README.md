@@ -56,7 +56,7 @@ Now to the implementation.
     mutable struct SGD<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64
         previous_q::Vector{Float64} # previous query
-        SGD(stepsize::Float64) = new(stepsize, Vector{Float64}())
+        SGD(stepsize::Float64) = new(stepsize, Float64[])
     end
 
     # initialisation step 

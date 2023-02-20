@@ -6,17 +6,16 @@ We saw how to run an asynchronous version of the SGD algorithm on a LRMSE proble
   - [Synchronous run](@ref)
   - [Active processes](@ref)
   - [Recording iterates](@ref)
-  - [Custom stopping criterion](@ref)
-  - [`start` vs `start!`](@ref)
+  - [Customization of `start`'s execution](@ref custom_execution)
   - [Handling worker failures](@ref)
-  - [Algorithm templates](@ref algorithm_templates)
+  - [Algorithm wrappers](@ref algorithm_wrappers)
 
 ## Working with a distributed problem
 
 Suppose you have a `make_problem` function
 
 ```julia
-# Note: In this example we sample `A` and `b`. 
+# Note: In this example, we sample `A` and `b`. 
 # In practice, we could read them from a file or any other source.
 @everywhere function make_problem(pid)
     pid==1 && return nothing # for now, let's assign process 1 an empty problem
@@ -24,10 +23,10 @@ Suppose you have a `make_problem` function
 end
 ```
 
-When instanciating your problems you might have three requirement:
+When instantiating your problems you might have three requirements:
 
-- **Limiting comunication costs** and **avoiding duplicated memory**: loading problems directly on their assigned processes is be preferable to loading them central node before sending them to their respective processes
-- **Persistant data**: necessary if you want to reuse problems for multiple experiments (you don't want your problems to be stuck on  remote processes in `start`'s local scope)
+- **Limiting communication costs** and **avoiding duplicated memory**: loading problems directly on their assigned processes is preferable to loading them central node before sending them to their respective processes
+- **Persistent data**: necessary if you want to reuse problems for multiple experiments (you don't want your problems to be stuck on  remote processes in `start`'s local scope)
 
 Depending on your needs, you have three options to construct your problems:
 
@@ -55,7 +54,7 @@ distributed_problem = DistributedObject((pid) -> make_problem(pid), pids=procs()
 As previously noted, Option 2 should be avoided when working with large data. However, it does offer the advantage of preserving access to problems, which is not possible with Option 1. This opens up the possibility of reconstructing the global problem.
 
 ```julia
-# reconstructing global problem from problems storred locally
+# reconstructing global problem from problems stored locally
 function LRMSE(problems::Dict)
     pids = [pid for pid in keys(problems) if pid ≠ 1]
     n = problems[pids[1]].n
@@ -73,7 +72,7 @@ sgd = SGD(1/problems[1].L)
 *Option 3* is the best of both worlds:
 
 ```julia
-# reconstructing global problem from problems storred remotely 
+# reconstructing global problem from problems stored remotely 
 function LRMSE(d::DistributedObject)
     pids = [pid for pid in where(d) if pid ≠ 1]
     n = fetch(@spawnat pids[1] d[].n)
@@ -97,7 +96,7 @@ history = start(sgd, distributed_problem, stopat);
 
 ## Synchronous run
 
-If you want to run your algorithm synchronously you just have to define the **synchronous central step** performed by the central node when receiving a answers `as::Vector{A}` from all the `workers`...
+If you want to run your algorithm synchronously you just have to define the **synchronous central step** performed by the central node when receiving answers `as::Vector{A}` from all the `workers`...
 
 ```julia
 @everywhere begin
@@ -114,7 +113,7 @@ history = start(sgd, distributed_problem, stopat; synchronous=true);
 
 ## Active processes
 
-You can chose which processes are active with the `pids` keyword
+You can choose which processes are active with the `pids` keyword
 
 ```julia
 history = start(sgd, problem_constructor, stopat; pids=[2,3,6]);
@@ -126,77 +125,136 @@ If `pids=[1]`, a non-distributed (and necessarily synchronous) version of your a
 history = start(sgd, (pid)->LRMSE(rand(42,10),rand(42)), stopat; pids=[1], synchronous=true);
 ```
 
-## Recording iterates
+## [Recording iterates](@id recording_iterated)
 
-The queries`::Q` sent by the central node are saved at intervals specified by saveat=(iterations, epochs).
+The queries`::Q` sent by the central node, along with the iterations, epochs, times at wich they were recorded, are saved at intervals specified by the keyword `saveat`: every `iteration` and every `epoch` (see [`savenow`](@ref) for custom saving criteria).
+
+You can set any or all criteria: `saveat=(iteration=100, epoch=10)` or `saveat=(epoch=100,)` for example.
+
+To also save the workers' answers`::A`, simply add the `save_answers=true` keyword (see [`savevalues`](@ref) and [`report`](@ref) to save additional variables during execution).
 
 ```julia
-history = start(sgd, distributed_problem, stopat; saveat=(10,0));
-```
-To also save the workers' answers`::A`, simply add the `save_answers=true` keyword.
-
-```julia
-history = start(sgd, distributed_problem, stopat; saveat=(10,0), save_answers=true);
+history = start(sgd, distributed_problem, stopat; saveat=(iteration=100, epoch=10), save_answers=true);
 ```
 
-## Custom stopping criterion
+## [Customization of `start`'s execution](@id custom_execution)
 
-To augment the default `stopat=(iteration, epoch, time)` with an additional stopping criterion, follow these steps:
-
-1. Define a new method `AsynchronousIterativeAlgorithms.stopnow` to be dispatched when called on your algorithm.
-2. Declare that your algorithm implements the `Stoppable` trait.
-
-As an example, let's modify the `SGD` example to include a *precision* criterion.
+Let's look at a slightly modified version of `SGD` where we track the *"precision"* of our iterative algorithm, measured as the distance between the last two iterates.
 
 ```julia
 @everywhere begin
     using LinearAlgebra
 
-    mutable struct CustomSGD<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
+    mutable struct SGDbis<:AbstractAlgorithm{Vector{Float64},Vector{Float64}}
         stepsize::Float64
         previous_q::Vector{Float64}
-        gap::Float64 # will hold the distance between the last two iterates
-        precision::Float64
-        CustomSGD(stepsize::Float64, precision) = new(stepsize, Vector{Float64}(), 10^6, precision)
+        precision::Float64  # will hold the distance between the last two iterates
+        precisions::Vector{Float64} # record of all the precisions 
+        SGDbis(stepsize::Float64) = new(stepsize, Vector{Float64}(), Inf, Vector{Float64}())
     end
     
-    function (sgd::CustomSGD)(problem::Any) 
+    # no changes
+    function (sgd::SGDbis)(problem::Any)
         sgd.previous_q = rand(problem.n)
     end
     
-    function (sgd::CustomSGD)(q::Vector{Float64}, problem::Any)
+    # no changes
+    function (sgd::SGDbis)(q::Vector{Float64}, problem::Any)
         sgd.stepsize * problem.∇f(q, rand(1:problem.m))
     end
     
-    function (sgd::CustomSGD)(a::Vector{Float64}, worker::Int64, problem::Any) 
+    function (sgd::SGDbis)(a::Vector{Float64}, worker::Int64, problem::Any) 
         q = sgd.previous_q - a 
-        sgd.gap = norm(q-sgd.previous_q)
+        sgd.precision = norm(q-sgd.previous_q)
         sgd.previous_q = q
     end
-
-    # Stop when gap is small enough
-    AIA.stopnow(sgd::CustomSGD) = sgd.gap ≤ sgd.precision
-    AIA.Stoppability(::CustomSGD) = Stoppable()    
 end
-
-history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.));
 ```
 
-> This was only meant to be an example as in practice you can specify a precision threshold by passing a fourth value in `stopat`. To use a custom distance function instead of the default `(x,y)->norm(x-y)`, provide the desired function through the `distance` keyword of `start`.
+> Recall that we defined `const AIA = AsynchronousIterativeAlgorithms`
+
+### [`stopnow`](@ref)
+
+By default, you can specify the any of following stopping criteria through the `stopat` argument: maximum `iteration`, `epoch` and `time`. If any is met, the execution is stopped.
+
+If you require additional stopping conditions, for instance *"stop at current iteration if the precision is below a threshold"* you can define [`stopnow`](@ref) on your algorithm:
 
 ```julia
-history = start(CustomSGD(0.01, 0.1), distributed_problem, (10,0,0.,0.1); distance=(x,y)->norm(x-y,1));
+function AIA.stopnow(sgd::SGDbis, stopat::NamedTuple) 
+    haskey(stopat, :precision) ? sgd.precision ≤ stopat.precision : false
+end
 ```
 
-## [`start`](@ref) vs [`start!`](@ref)
+You can now set `stopat` to `(iteration=1000, precision=1e-5)` or `(precision=1e-5,)` for example.
 
-`start` uses a deep copy of your algorithm and won't modify it. To enable modifications (e.g. to record information during the execution), use `start!`.
+### [`savenow`](@ref)
+
+By default, you can specify intervals at which [some parameters](@ref recording_iterated) are recorded through the `saveat` keyword: every `iteration` and every `epoch`.
+
+If you require additional saving checkpoints, for instance *"save current iteration if is below a threshold"*, you can define [`savenow`](@ref) on your algorithm:
+
+```julia
+function AIA.savenow(sgd::SGDbis, saveat::NamedTuple) 
+    haskey(saveat, :precision) ? sgd.precision ≤ saveat.precision : false 
+end
+```
+
+You can now set `saveat` to `(precision=1e-4, time=42)` or just `(precision=1e-4,)` for example.
+
+### [`savevalues`](@ref)
+
+[By default](@ref recording_iterated), at each `saveat` checkpoint, only queries, iterations, epochs, times, answer count per worker and optionally answers and their provenance.
+
+If you want to record other values, for instance the precisions computed at the `saveat` checkpoints, you can define [`savevalues`](@ref) on your algorithm:
+
+```julia
+function AIA.savevalues(sgd::SGDbis) 
+    sgd.precisions = append!(sgd.precisions, [sgd.precision])
+end
+```
+
+### [`report`](@ref)
+
+To retrieve any values held by your algorithm, for example the precisions, return them as a `NamedTuple` in [`report`](@ref):
+
+```julia
+function AIA.report(sgd::SGDbis)
+    (precisions = sgd.precisions,)
+end
+```
+
+They will now be outputted by [`start`](@ref).
+
+### [`progress`](@ref)
+
+When `verbose>1` a progress bar is displayed. To reflect any progress other than the number of iterations, epochs, and the time, return a value between `0` to `1` (`1` meaning completion) in [`progress`](@ref):
+
+```julia
+function AIA.progress(sgd::SGDbis, stopat::NamedTuple) 
+    if haskey(stopat, :precision) 
+        sgd.precision == 0 && return 1.
+        return stopat.precision / sgd.precision
+    else 
+        return 0.
+    end
+end
+```
+
+### [`showvalues`](@ref)
+
+Below the progress bar, by default, the number of iterations, epochs and answers-per-worker count are displayed. If you want to keep track of other values, return them as a `Vector` of `Tuple{Symbol,Any}` in [`savevalues`](@ref):
+
+```julia
+function AIA.showvalues(sgd::SGDbis)
+    [(:precision, round(sgd.precision; sigdigits=4))]
+end
+```
 
 ## Handling worker failures
 
 If you expect some workers to fail but still want the algorithm to continue running, you can set the `resilience` parameter to the maximum number of worker failures you can tolerate before the execution is terminated.
 
-## [Algorithm templates](@id algorithm_templates)
+## [Algorithm wrappers](@id algorithm_wrappers)
 
 You are free to create your own algorithms, but if you're interested in *aggregation algorithms*, you can use an implementation provided in this library. The iteration of such an algorithm performs the following computation:
 
@@ -206,40 +264,54 @@ where $q_j$ is computed by the worker upon reception of $\textrm{answer}(q_i)$ f
 
 The [`AggregationAlgorithm`](@ref) in this library requires you to specify three methods: query, answer, and aggregate. Here's an example showing the required signatures of these three methods:
 
-
 ```julia
 @everywhere begin 
     using Statistics
 
-    function agg_gd(q0, stepsize)
-        initialize(problem::Any) = q0
-        aggregate(a::Vector{Vector{Float64}}, connected::Vector{Int64}) = mean(a)            
-        query(a::Vector{Float64}, problem::Any) = a
-        answer(q::Vector{Float64}, problem::Any) = q - stepsize * problem.∇f(q)   
-
-        AggregationAlgorithm{Vector{Float64}, Vector{Float64}}(initialize, aggregate, query, answer; pids=workers())
+    struct ToBeAggregatedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
+        stepsize::Float64 
+        q0::Vector{Float64}
     end
+
+    (tba::ToBeAggregatedGD)(problem::Any) = tba.q0
+    (tba::ToBeAggregatedGD)(a::Vector{Vector{Float64}}, connected::Vector{Int64}) = mean(a)            
+    (tba::ToBeAggregatedGD)(a::Vector{Float64}, problem::Any) = a
+    (tba::ToBeAggregatedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
 end 
 
-history = start(agg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
+algorithm = AggregationAlgorithm(ToBeAggregatedGD(0.01, rand(10)); pids=workers())
+
+history = start(algorithm, distributed_problem, (epoch=100,));
 ```
 
-**Memory limitation:** At any point in time, the central worker should have access must have access to the latest answers $a_i$ from *all* the connected workers. This means storing a lot of $a_i$ if we use many workers. There is a workaround when the aggregation operation is an *average*. In this case only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.
+**Memory limitation:** At any point in time, the central worker should have access must have access to the latest answers $a_i$ from *all* the connected workers. This means storing a lot of $a_i$ if we use many workers. There is a workaround when the aggregation operation is an *average*. In this case, only the equivalent of one answer needs to be saved on the central node, regardless of the number of workers.
 
 [`AveragingAlgorithm`](@ref) implements this memory optimization. Here you only need to define `query`, the `answer`
 
 ```julia
 @everywhere begin 
-    # If you want the average to be weighted, you can add the keywords pids with their corresponding weights
-    function avg_gd(q0, stepsize, pids=workers(), weights=ones(nworkers())) 
-        initialize(problem::Any) = q0
-        query(a::Vector{Float64}, problem::Any) = a
-        answer(q::Vector{Float64}, problem::Any) =  q - stepsize * problem.∇f(q)
-        AveragingAlgorithm{Vector{Float64}, Vector{Float64}}(initialize, query, answer; pids=pids, weights=weights)
-    end
-end
+    using Statistics
 
-history = start(avg_gd(rand(10), 0.01), distributed_problem, (1000,0,0.));
+    struct ToBeAveragedGD <: AbstractAlgorithm{Vector{Float64},Vector{Float64}}
+        stepsize::Float64 
+        q0::Vector{Float64}
+    end
+
+    (tba::ToBeAveragedGD)(problem::Any) = tba.q0
+    (tba::ToBeAveragedGD)(a::Vector{Float64}, problem::Any) = a
+    (tba::ToBeAveragedGD)(q::Vector{Float64}, problem::Any) = q - tba.stepsize * problem.∇f(q)
+end 
+
+algorithm = AveragingAlgorithm(ToBeAveragedGD(0.01, rand(10)); pids=workers(), weights=ones(nworkers()))
+
+history = start(algorithm, distributed_problem, (epoch=100,));
 ```
+
+Note that you can implement the [custom callbacks](@ref custom_execution) on both these algorithms by defining them on your algorithm:
+
+```julia
+report(::ToBeAggregatedGD) = # do something
+```
+
 
 Hope you find this library helpful and look forward to seeing how you put it to use!

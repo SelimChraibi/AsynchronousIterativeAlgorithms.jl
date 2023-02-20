@@ -1,5 +1,6 @@
 using Documenter
 using AsynchronousIterativeAlgorithms
+const AIA = AsynchronousIterativeAlgorithms
 
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms.jl",
