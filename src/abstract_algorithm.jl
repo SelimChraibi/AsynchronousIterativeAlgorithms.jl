@@ -220,7 +220,6 @@ function stopnow(ra::RecordedAlgorithm)
     (haskey(ra.stopat, :time) && ra.time ≥ ra.stopat.time) #||    
 end
 
-using UnicodePlots
 """
     showvalues(::AbstractAlgorithm) = Tuple{Symbol, Any}[]
     
