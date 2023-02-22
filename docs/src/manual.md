@@ -119,7 +119,7 @@ You can choose which processes are active with the `pids` keyword
 history = start(sgd, problem_constructor, stopat; pids=[2,3,6]);
 ```
 
-If `pids=[1]`, a non-distributed (and necessarily synchronous) version of your algorithm will be `start`ed.
+If `pids=[1]`, a non-distributed (and necessarily synchronous) version of your algorithm will be run.
 
 ```julia
 history = start(sgd, (pid)->LRMSE(rand(42,10),rand(42)), stopat; pids=[1], synchronous=true);
