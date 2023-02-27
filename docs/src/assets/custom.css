@@ -75,7 +75,7 @@ a:hover {
 code, pre {
     font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
     border-radius: 6px;
-    background-color: color(srgb 0.9655 0.9725 0.981);
+    background-color: #f6f8fa;
 }
 .content pre {
     border: none;
@@ -146,7 +146,7 @@ html.theme--documenter-dark #documenter .docs-sidebar ul.docs-menu .tocitem, htm
 
 html.theme--documenter-dark code {
     /* background-color: rgba(52, 57, 65, 1); */
-    background-color: rgba(35, 42, 52, 1);
+    background-color: #232a34;
 }
 
 /* Set the style for the header [dark theme]*/
