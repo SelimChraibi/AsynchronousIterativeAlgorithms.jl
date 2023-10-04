@@ -5,6 +5,7 @@ const AIA = AsynchronousIterativeAlgorithms
 makedocs(
     sitename = "AsynchronousIterativeAlgorithms.jl",
     authors = "Selim Chraibi",
+    checkdocs=:none,
     format = Documenter.HTML(sidebar_sitename=false, 
                              assets=["assets/custom.css"]),
     modules = [AsynchronousIterativeAlgorithms],
