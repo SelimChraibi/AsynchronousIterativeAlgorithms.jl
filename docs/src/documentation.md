@@ -44,10 +44,10 @@ showvalues
 
 The two following algorithms already subtype [`AbstractAlgorithm{Q,A}`](@ref) and are ready to use in [`start`](@ref).
 
-```@autodocs
+```@docs
 AggregationAlgorithm
 ```
 
-```@autodocs
+```@docs
 AveragingAlgorithm
 ```
