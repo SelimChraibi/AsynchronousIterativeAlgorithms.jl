@@ -5,7 +5,7 @@ designing your algorithm.
 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or
 remote machines.
 
-A full manual is available at https://selim78.github.io/AsynchronousIterativeAlgorithms.jl/dev/
+A full manual is available at https://SelimChraibi.github.io/AsynchronousIterativeAlgorithms.jl/dev/
 """
 module AsynchronousIterativeAlgorithms
 
