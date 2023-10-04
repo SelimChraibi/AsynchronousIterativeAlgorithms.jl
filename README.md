@@ -4,16 +4,16 @@
 |:---------------------------------------:|:---------------------------------------:|
 | [![Build Status][build-img]][build-url] | [![][docs-img]][docs-url]               |
 
-[docs-img]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/documentation.yml/badge.svg
-[docs-url]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/documentation.yml
-[build-img]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml/badge.svg?branch=main
-[build-url]: https://github.com/Selim78/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml?query=branch%3Amain
+[docs-img]: https://github.com/SelimChraibi/AsynchronousIterativeAlgorithms.jl/actions/workflows/documentation.yml/badge.svg
+[docs-url]: https://github.com/SelimChraibi/AsynchronousIterativeAlgorithms.jl/actions/workflows/documentation.yml
+[build-img]: https://github.com/SelimChraibi/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml/badge.svg?branch=main
+[build-url]: https://github.com/SelimChraibi/AsynchronousIterativeAlgorithms.jl/actions/workflows/CI.yml?query=branch%3Amain
 
 🧮 `AsynchronousIterativeAlgorithms.jl` handles the distributed asynchronous communication, so you can focus on designing your algorithm.
 
 💽 It also offers a convenient way to manage the distribution of your problem's data across multiple processes or remote machines.
 
-[📚 Full manual available here](https://selim78.github.io/AsynchronousIterativeAlgorithms.jl/dev/)
+[📚 Full manual available here](https://SelimChraibi.github.io/AsynchronousIterativeAlgorithms.jl/dev/)
 
 ## Installation
 
