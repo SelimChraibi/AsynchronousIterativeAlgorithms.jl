@@ -10,7 +10,8 @@ makedocs(
     modules = [AsynchronousIterativeAlgorithms],
     pages = ["Home" => "index.md",
             "Manual" => "manual.md",
-            "Documentation" => "documentation.md"]
+            "Documentation" => "documentation.md"],
+    strict = false
 )
 
 deploydocs(
