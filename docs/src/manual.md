@@ -42,7 +42,7 @@ problem_constructor = (pid) -> problems[pid]
 @everywhere using DistributedObjects
 distributed_problem = DistributedObject((pid) -> make_problem(pid), pids=procs())
 ```
-> Option 3 uses [`DistributedObjects`](https://github.com/Selim78/DistributedObjects.jl). In a nutshell, a `DistributedObject` instance references at most one object per process, and you can access the object stored on the current process with `[]`
+> Option 3 uses [`DistributedObjects`](https://github.com/SelimChraibi/DistributedObjects.jl). In a nutshell, a `DistributedObject` instance references at most one object per process, and you can access the object stored on the current process with `[]`
 
 
 |  | communication costs & duplicated memory 	| single use objectives 	|  	|
