@@ -14,4 +14,13 @@ module AsynchronousIterativeAlgorithms
     include("start.jl")
     include("algorithm_wrappers.jl")
 
+    export AbstractAlgorithm, 
+           stopnow, 
+           savenow, 
+           savevalues, 
+           report, 
+           progress, 
+           showvalues, 
+           start, 
+           start!
 end

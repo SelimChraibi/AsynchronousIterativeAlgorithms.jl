@@ -1,4 +1,3 @@
-export start, start!
 
 using Distributed
 using DistributedObjects
